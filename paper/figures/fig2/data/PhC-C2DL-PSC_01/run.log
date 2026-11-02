@@ -1,0 +1,570 @@
+  ELEPHANT detection model 'automahout-bench-drift_PhC-C2DL-PSC_01_new_repfull_cpsam_detection.pth' created from random weights.
+  Image profile: background 136 +/- 18, bright tail 255 (6.7 sigma above it, 1.9% of the frame) — reads as NOT fluorescence: a cell here is not reliably brighter than what surrounds it, so intensity-based deletion is off and crops need a look, not a threshold.
+  Measuring the cell size in the image (first, middle and last frame)...
+  Cell size: cell radius 7.67 µm measured in the image -> ELEPHANT detection radius 3.84..19.18 µm, linking distance 30.69 µm (150 blobs)
+  Describing the movie with the vision model (this takes a moment)...
+  Asking jp.anthropic.claude-haiku-4-5-20251001-v1:0 for pre-flight guidance (up to 90s; the dialog opens with the current settings if it takes longer)...
+  ELEPHANT settings from the data: cell radius 7.67 µm measured in the image -> ELEPHANT detection radius 3.84..19.18 µm, linking distance 30.69 µm
+  Questions about merged spots and divisions are off for this run (pre-flight dialog): two tracks running into one detection are split, divisions whose daughters do not move apart are cut, without asking.
+  Starting at t=0 — you set that in the pre-flight dialog, so this run neither resumes from what is already tracked nor takes the agent's own start_timepoint.
+=== Adaptive tracking: 30 windows of 10 tp, t=0..299 ===
+  Structural invariants active — every phase is checked for protected-spot loss (0 spot(s) currently under guard — no protected tag configured, so that check is inert) and for changes outside its declared timepoint range; per-phase limits add detection-ceiling, churn and continuity checks. Violations appear inline as "!! INVARIANT"; silence means every check passed.
+  DIAGNOSTIC RUN — flat-contrast deletion is switched off (detections with no local contrast peak are KEPT). Spot counts are not comparable with a normal run, and the kept spots become training positives for the next round.
+  Image physical size: 1152.0 x 921.6 x 1.6 µm
+  Intensity, contrast and evenness are measured on mipmap level 0 of 2 (voxel up to 1.60 µm, a typical cell spanning ~6 voxels). Full resolution costs a block fetch per probe — measured at 150-400 ms EACH on this dataset — and a coarser voxel is an average of the finer ones, so it estimates a cell's mean and evenness better, not worse.
+  No acceptance profile yet for dataset 'PhC-C2DL-PSC_01' — will auto-learn one from reliable tracks as they accumulate (no manual labelling needed).
+  Only 0 confirmed spot(s) in this project (need 50). OFF for this run: the debris filter (its size/evenness/brightness thresholds are percentiles of your confirmed cells). The cap on how many detections each window may teach still applies if you stated a cell count — it then keeps the ones standing furthest above the background instead of the ones closest to your confirmed cells. Tag some cells Status > Completed and run Plugins > Automahout > Build GT Annotation Store to turn the rest on.
+  Tool 'cellpose.nuclei' added from http://127.0.0.1:8765 (role DETECT).
+  Tool 'cellpose.cyto3' added from http://127.0.0.1:8765 (role DETECT).
+  Tool 'cellpose.nuclei3d' added from http://127.0.0.1:8765 (role DETECT).
+  Tool 'stardist.fluo' added from http://127.0.0.1:8765 (role DETECT).
+  Tool 'stardist.he' added from http://127.0.0.1:8765 (role DETECT).
+  Tool 'microsam.ais' added from http://127.0.0.1:8766 (role DETECT).
+  Tool 'microsam.ais3d' added from http://127.0.0.1:8766 (role DETECT).
+  Tool 'cellpose.cpsam' added from http://127.0.0.1:8767 (role DETECT).
+  Detector choice: stardist.he keeps 0.00 of its detections from one frame to the next (worst pair 0.00; t=0/1: 0/0 detections, 0.00; the other 2 pair(s) not run, this one decides it).
+  Detector choice: cellpose.cpsam keeps 0.98 of its detections from one frame to the next (worst pair 0.97; t=0/1: 88/88 detections, 1.00, t=149/150: 209/209 detections, 0.97, t=299/298: 803/800 detections, 0.98).
+  Detector choice: cellpose.cyto3 keeps 0.96 of its detections from one frame to the next (worst pair 0.93; t=0/1: 87/87 detections, 1.00, t=149/150: 210/206 detections, 0.95, t=299/298: 620/615 detections, 0.93).
+  Detector choice: microsam.ais keeps 0.94 of its detections from one frame to the next (worst pair 0.86; t=0/1: 84/84 detections, 1.00, t=149/150: 196/198 detections, 0.95, t=299/298: 566/536 detections, 0.86).
+  Detector: cellpose.cpsam (pretrained, as it is) -- chosen by persistence: it keeps 0.98 of its detections from one frame to the next, and at least 0.80 on every pair.
+  Ceiling — you accepted cellpose.cpsam in the trial. Expected cells per frame is now 88 -> 803 (its counts at t=0 and t=299, replacing the agent's guess), and the ceiling 1606, as if you had entered it in the pre-flight dialog.
+  Window plan: pretrained.detect (DETECT) -> nn.link (LINK) -> autocorrect.window (CORRECT_DETECTIONS) -> topology.consistency (CORRECT_LINEAGE)
+
+=== Window [t=0..9] (1/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=89.5 (CV_temporal=0.01), size=21.7, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 2.7 µm (≈4x the median consecutive-link length over t=0..9).
+  [5/6] Evaluating and correcting...
+  Correction plan, per frame: frame.weak_spots -> frame.small_spots -> frame.sandwiched -> frame.stacked_duplicates -> frame.merge_duplicates -> frame.long_links -> frame.relink -> frame.convergence_links -> frame.trifurcations -> elephant.recover_predecessors -> frame.division_daughters -> frame.orphan_starts -> frame.short_tracklets -> elephant.fill_gaps -> frame.isolated_rescue -> frame.bridge_gaps -> frame.isolated_spots -> elephant.refit_anisotropic -> frame.bridge_after_refit -> frame.isolated_final
+  Correction pass 'frame.sandwiched' is off for this run: it removes a detection wedged between two others along z, a stack's artefact; in 2D it takes ordinary neighbouring cells (measured on PSC 01: 82% of what it deleted were real cells)
+  Correction pass 'frame.stacked_duplicates' is off for this run: it removes a detection wedged between two others along z, a stack's artefact; in 2D it takes ordinary neighbouring cells (measured on PSC 01: 82% of what it deleted were real cells)
+  Correction pass 'elephant.recover_predecessors' is off for this run: it re-detects with ELEPHANT's model, which was not trained on this movie (the detector is cellpose.cpsam); gaps are bridged by the consistency step instead
+  Correction pass 'elephant.fill_gaps' is off for this run: it re-detects with ELEPHANT's model, which was not trained on this movie (the detector is cellpose.cpsam); gaps are bridged by the consistency step instead
+  Correction pass 'elephant.refit_anisotropic' is off for this run: it re-detects with ELEPHANT's model, which was not trained on this movie (the detector is cellpose.cpsam); gaps are bridged by the consistency step instead
+  [5c/6] Topology consistency check over t=0..9...
+  Correction plan, per window's lineage: lineage.unlink_fp -> lineage.converged_tracks -> lineage.thresholds -> lineage.rapid_divisions -> lineage.short_branches -> lineage.relink_free -> lineage.reconnect_orphans -> lineage.close_gaps -> lineage.excess_divisions -> lineage.staying_divisions -> lineage.implausible_divisions -> lineage.unstable_spots -> lineage.co_located_pairs
+  Correction pass 'lineage.converged_tracks' is off for this run: switched off for this run (automahout.passes.disable)
+  Divisions whose daughters did not move apart: 6, 0 asked about, 6 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=0, deleted short-branch spots=6, relinked to free detections=0, reconnected tracklets=0, closed gaps=0, de-branched (single-tracked)=6, unstable-deleted=6, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=off, min_branch_len=3, max_disp=2.7, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=7, of which 5 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 2 beyond 3.0 radii
+  [6/6] Validation: continuity=99% (interior spots with both in+out links), mean_track_len=9.5, isolated=6, spots/tp=87.7 (retention=98% of initial 89.5), CV_temporal=0.02, link_density=99% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -6/+0 links -0/+0; TOPOLOGY spots -13/+1 links -26/+820; DETECTION spots -0/+895 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 6 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 830 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=6.34). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=10..19] (2/30) ===
+  Expected count: 92.1 spots/tp by t=19 from the run's own growth (doubling every 205 tp, over 10 accepted timepoint(s)); the previous window held 87.7.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=88.8 (CV_temporal=0.01), size=23.4, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 2.8 µm (≈4x the median consecutive-link length over t=0..19).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=0..19...
+  Divisions whose daughters did not move apart: 6, 0 asked about, 6 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=0, deleted short-branch spots=5, relinked to free detections=0, reconnected tracklets=6, closed gaps=0, de-branched (single-tracked)=6, unstable-deleted=6, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=off, min_branch_len=3, max_disp=2.8, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=2, of which 0 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 2 beyond 3.0 radii
+  [6/6] Validation: continuity=100% (interior spots with both in+out links), mean_track_len=878.0, isolated=1, spots/tp=87.8 (retention=99% of initial 88.8), CV_temporal=0.00, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -6/+0 links -0/+0; TOPOLOGY spots -10/+0 links -32/+914; DETECTION spots -0/+888 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 1 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 1734 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=6.27). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=20..29] (3/30) ===
+  Expected count: 88.0 spots/tp by t=29 from the run's own growth (doubling every Infinity tp, over 20 accepted timepoint(s)); the previous window held 87.8.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=91.7 (CV_temporal=0.04), size=23.1, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 2.9 µm (≈4x the median consecutive-link length over t=0..29).
+  [5/6] Evaluating and correcting...
+  t=23 — 1 isolated spot(s) left unrescued: they read below 1.5 sigma above this frame's background, so linking them would only make a background detection permanent.
+  [5c/6] Topology consistency check over t=10..29...
+    refractory rule cut 2 of 2 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 19 tp back at the median, 3 at the earliest, 19 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 1 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 8, 0 asked about, 8 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=2, deleted short-branch spots=3, relinked to free detections=1, reconnected tracklets=3, closed gaps=0, de-branched (single-tracked)=8, unstable-deleted=3, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=2.9, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=8, of which 7 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 1 beyond 3.0 radii
+  [6/6] Validation: continuity=99% (interior spots with both in+out links), mean_track_len=112.9, isolated=4, spots/tp=90.3 (retention=98% of initial 91.7), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -3/+0 links -0/+0; TOPOLOGY spots -12/+0 links -39/+938; DETECTION spots -0/+917 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 4 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 2599 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=6.09). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=30..39] (4/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=94.9 (CV_temporal=0.02), size=22.8, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.0 µm (≈4x the median consecutive-link length over t=0..39).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=20..39...
+    refractory rule cut 1 of 1 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 3 tp back at the median, 3 at the earliest, 3 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 1 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 13, 0 asked about, 13 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=1, deleted short-branch spots=7, relinked to free detections=1, reconnected tracklets=9, closed gaps=0, de-branched (single-tracked)=13, unstable-deleted=6, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.0, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=12, of which 8 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 4 beyond 3.0 radii
+  [6/6] Validation: continuity=99% (interior spots with both in+out links), mean_track_len=117.0, isolated=3, spots/tp=93.6 (retention=99% of initial 94.9), CV_temporal=0.02, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -6/+0 links -0/+0; TOPOLOGY spots -11/+0 links -59/+995; DETECTION spots -0/+949 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 3 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 3542 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=6.02). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=40..49] (5/30) ===
+  Expected count: 94.7 spots/tp by t=49 from the run's own growth (doubling every 363 tp, over 40 accepted timepoint(s)); the previous window held 93.6.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=105.2 (CV_temporal=0.02), size=22.1, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.0 µm (≈4x the median consecutive-link length over t=0..49).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=30..49...
+    refractory rule cut 5 of 5 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 3 tp back at the median, 1 at the earliest, 5 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 2 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 13, 0 asked about, 13 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=5, deleted short-branch spots=3, relinked to free detections=2, reconnected tracklets=10, closed gaps=0, de-branched (single-tracked)=14, unstable-deleted=7, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.0, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=17, of which 11 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 6 beyond 3.0 radii
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=80.5, isolated=1, spots/tp=104.6 (retention=99% of initial 105.2), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -7/+0 links -0/+0; TOPOLOGY spots -4/+0 links -70/+1108; DETECTION spots -0/+1052 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 1 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 4508 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=5.99). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=50..59] (6/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=111.0 (CV_temporal=0.02), size=22.0, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.0 µm (≈4x the median consecutive-link length over t=0..59).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=40..59...
+    refractory rule cut 5 of 5 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 5 tp back at the median, 1 at the earliest, 15 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 2 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 17, 0 asked about, 17 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=5, deleted short-branch spots=8, relinked to free detections=2, reconnected tracklets=15, closed gaps=0, de-branched (single-tracked)=17, unstable-deleted=1, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.0, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=23, of which 15 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 5 beyond 3.0 radii; 1 daughter 2.08x the mother, over 1.25; 1 beyond the per-frame displacement cap
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=84.5, isolated=2, spots/tp=109.8 (retention=99% of initial 111.0), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -1/+0 links -0/+0; TOPOLOGY spots -11/+0 links -72/+1168; DETECTION spots -0/+1110 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 2 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 5599 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=5.95). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=60..69] (7/30) ===
+  Expected count: 111.7 spots/tp by t=69 from the run's own growth (doubling every 170 tp, over 60 accepted timepoint(s)); the previous window held 109.8.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=116.7 (CV_temporal=0.01), size=22.9, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.1 µm (≈4x the median consecutive-link length over t=0..69).
+  [5/6] Evaluating and correcting...
+  t=66 — 1 isolated spot(s) left unrescued: they read below 1.5 sigma above this frame's background, so linking them would only make a background detection permanent.
+  [5c/6] Topology consistency check over t=50..69...
+    refractory rule cut 3 of 3 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 4 tp back at the median, 3 at the earliest, 20 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Divisions whose daughters did not move apart: 16, 0 asked about, 16 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=3, deleted short-branch spots=7, relinked to free detections=0, reconnected tracklets=13, closed gaps=0, de-branched (single-tracked)=17, unstable-deleted=8, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.1, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=18, of which 10 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 3 beyond 3.0 radii; 2 beyond the per-frame displacement cap; 1 daughter 1.96x the mother, over 1.25
+  [6/6] Validation: continuity=99% (interior spots with both in+out links), mean_track_len=128.3, isolated=4, spots/tp=115.5 (retention=99% of initial 116.7), CV_temporal=0.01, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -8/+0 links -0/+0; TOPOLOGY spots -10/+0 links -60/+1213; DETECTION spots -0/+1167 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 4 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 6770 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=5.88). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=70..79] (8/30) ===
+  Expected count: 119.6 spots/tp by t=79 from the run's own growth (doubling every 158 tp, over 70 accepted timepoint(s)); the previous window held 115.5.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=118.6 (CV_temporal=0.01), size=23.5, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.2 µm (≈4x the median consecutive-link length over t=0..79).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=60..79...
+    refractory rule cut 1 of 1 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 18 tp back at the median, 18 at the earliest, 18 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 1 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 15, 0 asked about, 15 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=1, deleted short-branch spots=0, relinked to free detections=1, reconnected tracklets=8, closed gaps=0, de-branched (single-tracked)=15, unstable-deleted=9, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.2, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=15, of which 9 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 2 beyond the per-frame displacement cap; 1 sizes differ by more than 2.50x; 1 daughter 2.05x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=118.7, isolated=0, spots/tp=118.7 (retention=100% of initial 118.6), CV_temporal=0.01, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -9/+0 links -0/+0; TOPOLOGY spots -0/+1 links -63/+1240; DETECTION spots -0/+1186 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  Auto-learned acceptance profile from 7941 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=5.80). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=80..89] (9/30) ===
+  Expected count: 125.0 spots/tp by t=89 from the run's own growth (doubling every 161 tp, over 80 accepted timepoint(s)); the previous window held 118.7.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=123.1 (CV_temporal=0.01), size=23.1, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.2 µm (≈4x the median consecutive-link length over t=0..89).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=70..89...
+    refractory rule cut 2 of 2 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 5 tp back at the median, 3 at the earliest, 5 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 1 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 14, 0 asked about, 14 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=2, deleted short-branch spots=2, relinked to free detections=1, reconnected tracklets=13, closed gaps=0, de-branched (single-tracked)=14, unstable-deleted=0, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.2, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=17, of which 9 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 3 beyond 3.0 radii; 2 beyond the per-frame displacement cap; 2 sizes differ by more than 2.50x
+  [6/6] Validation: continuity=99% (interior spots with both in+out links), mean_track_len=153.6, isolated=1, spots/tp=122.9 (retention=100% of initial 123.1), CV_temporal=0.01, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: TOPOLOGY spots -2/+0 links -65/+1289; DETECTION spots -0/+1231 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 1 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 9188 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=5.77). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=90..99] (10/30) ===
+  Expected count: 130.1 spots/tp by t=99 from the run's own growth (doubling every 164 tp, over 90 accepted timepoint(s)); the previous window held 122.9.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=128.4 (CV_temporal=0.01), size=22.6, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.2 µm (≈4x the median consecutive-link length over t=0..99).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=80..99...
+    refractory rule cut 1 of 1 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 6 tp back at the median, 6 at the earliest, 6 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Divisions whose daughters did not move apart: 10, 0 asked about, 10 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=1, deleted short-branch spots=2, relinked to free detections=0, reconnected tracklets=7, closed gaps=1, de-branched (single-tracked)=10, unstable-deleted=0, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.2, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=14, of which 7 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 3 sizes differ by more than 2.50x; 2 beyond 3.0 radii; 1 daughter 1.33x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=160.4, isolated=0, spots/tp=128.3 (retention=100% of initial 128.4), CV_temporal=0.01, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: TOPOLOGY spots -2/+1 links -111/+1389; DETECTION spots -0/+1284 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  Auto-learned acceptance profile from 10383 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=5.77). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=100..109] (11/30) ===
+  Expected count: 135.5 spots/tp by t=109 from the run's own growth (doubling every 166 tp, over 100 accepted timepoint(s)); the previous window held 128.3.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=138.8 (CV_temporal=0.04), size=21.9, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.3 µm (≈4x the median consecutive-link length over t=0..109).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=90..109...
+    refractory rule cut 8 of 8 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 4 tp back at the median, 1 at the earliest, 19 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 5 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 22, 0 asked about, 22 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=8, deleted short-branch spots=6, relinked to free detections=5, reconnected tracklets=16, closed gaps=1, de-branched (single-tracked)=22, unstable-deleted=2, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.3, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=25, of which 16 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 4 beyond the per-frame displacement cap; 3 sizes differ by more than 2.50x; 1 daughter 1.34x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=81.4, isolated=4, spots/tp=138.4 (retention=100% of initial 138.8), CV_temporal=0.04, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -2/+0 links -0/+0; TOPOLOGY spots -6/+3 links -132/+1505; DETECTION spots -0/+1388 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 4 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 11667 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=5.74). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=110..119] (12/30) ===
+  Expected count: 142.8 spots/tp by t=119 from the run's own growth (doubling every 160 tp, over 110 accepted timepoint(s)); the previous window held 138.4.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=156.2 (CV_temporal=0.03), size=21.4, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.3 µm (≈4x the median consecutive-link length over t=0..119).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=100..119...
+    refractory rule cut 4 of 4 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 5 tp back at the median, 2 at the earliest, 5 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 1 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 29, 0 asked about, 29 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=4, deleted short-branch spots=5, relinked to free detections=1, reconnected tracklets=20, closed gaps=0, de-branched (single-tracked)=29, unstable-deleted=7, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.3, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=34, of which 23 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 4 beyond the per-frame displacement cap; 4 beyond 3.0 radii; 1 daughter 1.34x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=74.0, isolated=4, spots/tp=155.5 (retention=100% of initial 156.2), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -7/+0 links -0/+0; TOPOLOGY spots -8/+0 links -131/+1670; DETECTION spots -0/+1562 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 4 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 13202 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=5.65). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=120..129] (13/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=169.5 (CV_temporal=0.03), size=20.6, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.4 µm (≈4x the median consecutive-link length over t=0..129).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=110..129...
+    refractory rule cut 6 of 6 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 4 tp back at the median, 2 at the earliest, 16 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 5 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 25, 0 asked about, 25 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=6, deleted short-branch spots=5, relinked to free detections=5, reconnected tracklets=24, closed gaps=1, de-branched (single-tracked)=27, unstable-deleted=9, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.4, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=29, of which 23 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 5 beyond 3.0 radii; 1 beyond the per-frame displacement cap
+  [6/6] Validation: continuity=99% (interior spots with both in+out links), mean_track_len=141.0, isolated=2, spots/tp=169.2 (retention=100% of initial 169.5), CV_temporal=0.04, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -9/+0 links -0/+0; TOPOLOGY spots -5/+2 links -152/+1837; DETECTION spots -0/+1695 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 2 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 14867 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=5.60). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=130..139] (14/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=188.6 (CV_temporal=0.02), size=20.0, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.5 µm (≈4x the median consecutive-link length over t=0..139).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=120..139...
+    refractory rule cut 7 of 7 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 5 tp back at the median, 3 at the earliest, 20 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 5 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 24, 0 asked about, 24 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=7, deleted short-branch spots=1, relinked to free detections=5, reconnected tracklets=21, closed gaps=0, de-branched (single-tracked)=25, unstable-deleted=10, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.5, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=29, of which 21 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 4 beyond the per-frame displacement cap; 4 beyond 3.0 radii
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=94.1, isolated=1, spots/tp=188.1 (retention=100% of initial 188.6), CV_temporal=0.02, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -10/+0 links -0/+0; TOPOLOGY spots -1/+0 links -151/+2016; DETECTION spots -0/+1886 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 1 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 16714 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=5.47). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=140..149] (15/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=204.3 (CV_temporal=0.03), size=20.5, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.6 µm (≈4x the median consecutive-link length over t=0..149).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=130..149...
+    refractory rule cut 8 of 8 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 8 tp back at the median, 2 at the earliest, 20 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 1 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 30, 0 asked about, 30 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=8, deleted short-branch spots=2, relinked to free detections=1, reconnected tracklets=24, closed gaps=0, de-branched (single-tracked)=33, unstable-deleted=10, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.6, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=36, of which 29 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 4 beyond the per-frame displacement cap; 2 beyond 3.0 radii; 1 daughter 2.08x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=97.0, isolated=5, spots/tp=203.8 (retention=100% of initial 204.3), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -10/+0 links -0/+0; TOPOLOGY spots -3/+1 links -165/+2188; DETECTION spots -0/+2043 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 5 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 18691 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=5.40). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=150..159] (16/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=219.1 (CV_temporal=0.03), size=21.2, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.7 µm (≈4x the median consecutive-link length over t=0..159).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=140..159...
+    refractory rule cut 12 of 12 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 5 tp back at the median, 2 at the earliest, 20 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 5 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 39, 0 asked about, 39 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=12, deleted short-branch spots=12, relinked to free detections=5, reconnected tracklets=33, closed gaps=1, de-branched (single-tracked)=39, unstable-deleted=16, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.7, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=38, of which 30 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 5 beyond 3.0 radii; 1 beyond the per-frame displacement cap; 1 sizes differ by more than 2.50x
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=83.9, isolated=1, spots/tp=218.1 (retention=100% of initial 219.1), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -16/+0 links -0/+0; TOPOLOGY spots -13/+1 links -175/+2342; DETECTION spots -0/+2191 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 1 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 20843 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=5.23). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=160..169] (17/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=239.1 (CV_temporal=0.03), size=21.0, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.7 µm (≈4x the median consecutive-link length over t=0..169).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=150..169...
+    refractory rule cut 10 of 10 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 4 tp back at the median, 2 at the earliest, 7 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 5 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 43, 0 asked about, 43 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=10, deleted short-branch spots=7, relinked to free detections=5, reconnected tracklets=34, closed gaps=1, de-branched (single-tracked)=45, unstable-deleted=4, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.7, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=53, of which 41 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 5 beyond 3.0 radii; 3 beyond the per-frame displacement cap; 2 daughter 1.37x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=76.9, isolated=6, spots/tp=238.3 (retention=100% of initial 239.1), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -4/+0 links -0/+0; TOPOLOGY spots -9/+1 links -161/+2523; DETECTION spots -0/+2391 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 6 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 23215 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=5.11). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=170..179] (18/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=257.6 (CV_temporal=0.03), size=20.3, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.8 µm (≈4x the median consecutive-link length over t=0..179).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=160..179...
+    refractory rule cut 9 of 9 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 4 tp back at the median, 1 at the earliest, 18 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 6 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 55, 0 asked about, 55 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=9, deleted short-branch spots=11, relinked to free detections=6, reconnected tracklets=35, closed gaps=0, de-branched (single-tracked)=56, unstable-deleted=8, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.8, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=62, of which 49 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 6 beyond the per-frame displacement cap; 4 beyond 3.0 radii; 1 daughter 1.40x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=69.4, isolated=6, spots/tp=256.7 (retention=100% of initial 257.6), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -8/+0 links -0/+0; TOPOLOGY spots -12/+1 links -177/+2718; DETECTION spots -0/+2576 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 6 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 25677 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=4.97). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=180..189] (19/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=282.0 (CV_temporal=0.02), size=20.1, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.9 µm (≈4x the median consecutive-link length over t=0..189).
+  [5/6] Evaluating and correcting...
+  t=189 — 2 isolated spot(s) left unrescued: they read below 1.5 sigma above this frame's background, so linking them would only make a background detection permanent.
+  [5c/6] Topology consistency check over t=170..189...
+    refractory rule cut 9 of 9 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 2 tp back at the median, 1 at the earliest, 5 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 5 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 61, 0 asked about, 61 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=9, deleted short-branch spots=9, relinked to free detections=5, reconnected tracklets=43, closed gaps=0, de-branched (single-tracked)=64, unstable-deleted=13, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.9, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=66, of which 53 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 7 beyond the per-frame displacement cap; 3 beyond 3.0 radii; 1 daughter 1.54x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=75.9, isolated=9, spots/tp=280.8 (retention=100% of initial 282.0), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -13/+0 links -0/+0; TOPOLOGY spots -10/+1 links -201/+2985; DETECTION spots -0/+2820 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 9 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 28438 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=4.88). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=190..199] (20/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=305.3 (CV_temporal=0.03), size=19.5, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 3.9 µm (≈4x the median consecutive-link length over t=0..199).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=180..199...
+    refractory rule cut 19 of 19 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 4 tp back at the median, 1 at the earliest, 20 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 8 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 73, 0 asked about, 73 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=19, deleted short-branch spots=13, relinked to free detections=8, reconnected tracklets=54, closed gaps=1, de-branched (single-tracked)=75, unstable-deleted=12, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=3.9, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=72, of which 60 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 6 beyond 3.0 radii; 4 beyond the per-frame displacement cap; 1 daughter 1.42x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=67.4, isolated=8, spots/tp=303.5 (retention=99% of initial 305.3), CV_temporal=0.04, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -12/+0 links -0/+0; TOPOLOGY spots -17/+1 links -279/+3284; DETECTION spots -0/+3053 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 8 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 31351 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=4.78). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=200..209] (21/30) ===
+  Expected count: 306.1 spots/tp by t=209 from the run's own growth (doubling every 105 tp, over 200 accepted timepoint(s)); the previous window held 303.5.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=341.6 (CV_temporal=0.04), size=19.8, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 4.0 µm (≈4x the median consecutive-link length over t=0..209).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=190..209...
+    refractory rule cut 20 of 20 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 5 tp back at the median, 1 at the earliest, 18 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 15 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 84, 0 asked about, 84 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=20, deleted short-branch spots=7, relinked to free detections=15, reconnected tracklets=63, closed gaps=0, de-branched (single-tracked)=87, unstable-deleted=21, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=4.0, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=82, of which 70 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 5 beyond 3.0 radii; 2 beyond the per-frame displacement cap; 1 daughter 1.33x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=68.2, isolated=12, spots/tp=340.9 (retention=100% of initial 341.6), CV_temporal=0.04, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -21/+0 links -0/+0; TOPOLOGY spots -7/+3 links -311/+3684; DETECTION spots -0/+3416 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 12 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 34681 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=4.66). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=210..219] (22/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=394.5 (CV_temporal=0.03), size=19.6, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 4.1 µm (≈4x the median consecutive-link length over t=0..219).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=200..219...
+    refractory rule cut 24 of 24 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 5 tp back at the median, 1 at the earliest, 19 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 9 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 96, 0 asked about, 96 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=24, deleted short-branch spots=10, relinked to free detections=9, reconnected tracklets=77, closed gaps=0, de-branched (single-tracked)=100, unstable-deleted=18, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=4.1, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=97, of which 83 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 2 daughter 1.34x the mother, over 1.25; 2 beyond the per-frame displacement cap; 2 beyond 3.0 radii
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=74.2, isolated=8, spots/tp=393.3 (retention=100% of initial 394.5), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -18/+0 links -0/+0; TOPOLOGY spots -10/+1 links -341/+4233; DETECTION spots -0/+3945 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 8 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 38356 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=4.52). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=220..229] (23/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=433.7 (CV_temporal=0.02), size=20.1, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 4.1 µm (≈4x the median consecutive-link length over t=0..229).
+  [5/6] Evaluating and correcting...
+  t=229 — 1 isolated spot(s) left unrescued: they read below 1.5 sigma above this frame's background, so linking them would only make a background detection permanent.
+  [5c/6] Topology consistency check over t=210..229...
+    refractory rule cut 34 of 34 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 4 tp back at the median, 1 at the earliest, 17 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 18 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 95, 0 asked about, 95 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=34, deleted short-branch spots=9, relinked to free detections=18, reconnected tracklets=87, closed gaps=0, de-branched (single-tracked)=105, unstable-deleted=9, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=4.1, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=103, of which 90 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 5 beyond 3.0 radii; 2 beyond the per-frame displacement cap; 1 daughter 1.34x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=74.5, isolated=9, spots/tp=432.2 (retention=100% of initial 433.7), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -9/+0 links -0/+0; TOPOLOGY spots -12/+0 links -341/+4618; DETECTION spots -0/+4337 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 9 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 42697 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=4.40). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=230..239] (24/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=456.1 (CV_temporal=0.01), size=20.7, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 4.1 µm (≈4x the median consecutive-link length over t=0..239).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=220..239...
+    refractory rule cut 21 of 21 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 5 tp back at the median, 1 at the earliest, 20 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 12 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 96, 0 asked about, 96 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=21, deleted short-branch spots=10, relinked to free detections=12, reconnected tracklets=79, closed gaps=0, de-branched (single-tracked)=101, unstable-deleted=22, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=4.1, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=90, of which 82 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 2 beyond the per-frame displacement cap; 2 beyond 3.0 radii; 1 daughter 1.95x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=92.8, isolated=11, spots/tp=454.9 (retention=100% of initial 456.1), CV_temporal=0.01, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -22/+0 links -0/+0; TOPOLOGY spots -10/+0 links -273/+4790; DETECTION spots -0/+4561 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 11 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 47231 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=4.27). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=240..249] (25/30) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=483.2 (CV_temporal=0.03), size=20.8, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 4.1 µm (≈4x the median consecutive-link length over t=0..249).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=230..249...
+    refractory rule cut 35 of 35 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 4 tp back at the median, 1 at the earliest, 20 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 22 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 102, 0 asked about, 102 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=35, deleted short-branch spots=10, relinked to free detections=22, reconnected tracklets=84, closed gaps=0, de-branched (single-tracked)=109, unstable-deleted=19, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=4.1, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=97, of which 88 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 1 daughter 1.95x the mother, over 1.25; 1 daughter 1.39x the mother, over 1.25; 1 daughter 1.44x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=79.0, isolated=7, spots/tp=482.1 (retention=100% of initial 483.2), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -19/+0 links -0/+0; TOPOLOGY spots -10/+2 links -301/+5074; DETECTION spots -0/+4832 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 7 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 51898 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=4.16). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=250..259] (26/30) ===
+  Expected count: 483.2 spots/tp by t=259 from the run's own growth (doubling every 94 tp, over 250 accepted timepoint(s)); the previous window held 482.1.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=516.7 (CV_temporal=0.02), size=21.1, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 4.1 µm (≈4x the median consecutive-link length over t=0..259).
+  [5/6] Evaluating and correcting...
+  t=252 — 1 isolated spot(s) left unrescued: they read below 1.5 sigma above this frame's background, so linking them would only make a background detection permanent.
+  [5c/6] Topology consistency check over t=240..259...
+    refractory rule cut 31 of 31 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 4 tp back at the median, 1 at the earliest, 14 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 17 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 111, 0 asked about, 111 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=31, deleted short-branch spots=13, relinked to free detections=17, reconnected tracklets=88, closed gaps=0, de-branched (single-tracked)=119, unstable-deleted=19, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=4.1, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=109, of which 99 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 3 beyond the per-frame displacement cap; 1 daughter 1.39x the mother, over 1.25; 1 daughter 1.34x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=76.9, isolated=16, spots/tp=514.9 (retention=100% of initial 516.7), CV_temporal=0.02, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -19/+0 links -0/+0; TOPOLOGY spots -14/+0 links -333/+5439; DETECTION spots -0/+5167 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 16 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 56917 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=4.08). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=260..269] (27/30) ===
+  Expected count: 527.1 spots/tp by t=269 from the run's own growth (doubling every 93 tp, over 260 accepted timepoint(s)); the previous window held 514.9.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=574.4 (CV_temporal=0.03), size=20.4, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 4.1 µm (≈4x the median consecutive-link length over t=0..269).
+  [5/6] Evaluating and correcting...
+  t=260 — 1 isolated spot(s) left unrescued: they read below 1.5 sigma above this frame's background, so linking them would only make a background detection permanent.
+  t=265 — 1 isolated spot(s) left unrescued: they read below 1.5 sigma above this frame's background, so linking them would only make a background detection permanent.
+  [5c/6] Topology consistency check over t=250..269...
+    refractory rule cut 43 of 43 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 3 tp back at the median, 1 at the earliest, 17 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 27 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 149, 0 asked about, 149 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=43, deleted short-branch spots=16, relinked to free detections=27, reconnected tracklets=112, closed gaps=1, de-branched (single-tracked)=154, unstable-deleted=27, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=4.1, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=140, of which 132 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 1 daughter 1.34x the mother, over 1.25; 1 daughter 1.29x the mother, over 1.25; 1 beyond the per-frame displacement cap
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=65.0, isolated=12, spots/tp=572.4 (retention=100% of initial 574.4), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -27/+0 links -0/+0; TOPOLOGY spots -18/+2 links -392/+6048; DETECTION spots -0/+5744 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 12 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 62341 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=3.99). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=270..279] (28/30) ===
+  Expected count: 577.1 spots/tp by t=279 from the run's own growth (doubling every 92 tp, over 270 accepted timepoint(s)); the previous window held 572.4.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=639.5 (CV_temporal=0.03), size=20.0, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 4.1 µm (≈4x the median consecutive-link length over t=0..279).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=260..279...
+    refractory rule cut 41 of 41 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 3 tp back at the median, 1 at the earliest, 20 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 17 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 150, 0 asked about, 150 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=41, deleted short-branch spots=19, relinked to free detections=17, reconnected tracklets=129, closed gaps=0, de-branched (single-tracked)=162, unstable-deleted=25, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=4.1, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=150, of which 138 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 1 daughter 1.64x the mother, over 1.25; 1 daughter 1.44x the mother, over 1.25; 1 daughter 1.29x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=77.7, isolated=9, spots/tp=636.8 (retention=100% of initial 639.5), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -25/+0 links -0/+0; TOPOLOGY spots -19/+0 links -423/+6742; DETECTION spots -0/+6395 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 9 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 68520 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=3.88). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=280..289] (29/30) ===
+  Expected count: 637.3 spots/tp by t=289 from the run's own growth (doubling every 91 tp, over 280 accepted timepoint(s)); the previous window held 636.8.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=702.8 (CV_temporal=0.03), size=19.6, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 4.1 µm (≈4x the median consecutive-link length over t=0..289).
+  [5/6] Evaluating and correcting...
+  t=285 — 1 isolated spot(s) left unrescued: they read below 1.5 sigma above this frame's background, so linking them would only make a background detection permanent.
+  [5c/6] Topology consistency check over t=270..289...
+    refractory rule cut 57 of 57 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 4 tp back at the median, 1 at the earliest, 20 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 25 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 164, 0 asked about, 164 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=57, deleted short-branch spots=30, relinked to free detections=25, reconnected tracklets=140, closed gaps=0, de-branched (single-tracked)=178, unstable-deleted=18, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=4.1, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=172, of which 155 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 3 beyond the per-frame displacement cap; 2 daughter 1.63x the mother, over 1.25; 1 daughter 1.44x the mother, over 1.25
+  [6/6] Validation: continuity=97% (interior spots with both in+out links), mean_track_len=64.8, isolated=13, spots/tp=699.5 (retention=100% of initial 702.8), CV_temporal=0.04, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -18/+0 links -0/+0; TOPOLOGY spots -32/+0 links -485/+7413; DETECTION spots -0/+7028 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 13 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 75223 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=3.78). separation HIGH — auto-accept/reject is reliable.
+
+=== Window [t=290..299] (30/30) ===
+  Expected count: 704.0 spots/tp by t=299 from the run's own growth (doubling every 90 tp, over 290 accepted timepoint(s)); the previous window held 699.5.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=777.6 (CV_temporal=0.03), size=19.4, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 4.1 µm (≈4x the median consecutive-link length over t=0..299).
+  [5/6] Evaluating and correcting...
+  t=298 — 1 isolated spot(s) left unrescued: they read below 1.5 sigma above this frame's background, so linking them would only make a background detection permanent.
+  [5c/6] Topology consistency check over t=280..299...
+    refractory rule cut 53 of 53 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 3 tp back at the median, 1 at the earliest, 20 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 28 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 207, 0 asked about, 207 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=53, deleted short-branch spots=32, relinked to free detections=28, reconnected tracklets=163, closed gaps=0, de-branched (single-tracked)=215, unstable-deleted=26, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=4.1, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=203, of which 179 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 3 beyond the per-frame displacement cap; 2 daughter 1.63x the mother, over 1.25; 2 daughter 1.82x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=67.9, isolated=13, spots/tp=774.5 (retention=100% of initial 777.6), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -26/+0 links -0/+0; TOPOLOGY spots -34/+0 links -494/+8158; DETECTION spots -0/+7776 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 13 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 82833 reliable track spot(s) (dataset=PhC-C2DL-PSC_01, separation=3.68). separation HIGH — auto-accept/reject is reliable.
+[fixed steps] adaptive_track: Adaptive tracking complete. 30/30 windows processed. predict_ok=300, link_ok=300, corrected=300 tp. continuity: mean=98%, worst=97% (threshold=70%). Tracks are continuous. recall: worst detection retention=98% of initial, isolated_spots=178. Cells may be MISSING (low retention / isolated spots) — continuity being high does NOT mean all cells were found; consider lowering min_intensity_ratio and re-running before declaring done. completeness: worst=100% (target=65%). Detection looks complete. divisions=498, closest two on one lineage 1 tp apart. The population went 85 -> 803 cells across the measured range, which takes at least 718 division events. The divisions track that growth, so the rising cell count is PROLIFERATION, not over-detection — do not treat it as a false-positive flood.
+    refractory rule cut 551 of 551 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 7 tp back at the median, 1 at the earliest, 20 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 223 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 829, 0 asked about, 829 branch link(s) cut.
+[fixed steps] auto.correct: auto.correct all 300 timepoints: merged=0, filled=771, deleted links=10, deleted spots=0, refit=0; consistency: unlinked fp spots=0, dissolved rapid divisions=551, deleted short-branch spots=16, relinked to free detections=223, reconnected tracklets=575, closed gaps=0, de-branched (single-tracked)=865, unstable-deleted=53, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=4.1, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=903, of which 777 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 38 beyond 3.0 radii; 24 beyond the per-frame displacement cap; 8 sizes differ by more than 2.50x; topology: divisions=412, min_div_interval=21 (threshold=auto=20)

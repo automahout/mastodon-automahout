@@ -1,0 +1,15 @@
+[project]
+name = "automahout-cellpose-sam"
+version = "0.1.0"
+description = "Cellpose-SAM (Cellpose 4, model cpsam) for Automahout: an offline comparison on CTC data, kept apart from the Cellpose 3 tool server"
+requires-python = "==3.12.*"
+dependencies = [
+    "cellpose>=4,<5",
+    "tifffile",
+    "numpy",
+    "scipy",
+    "scikit-image",
+]
+
+[tool.uv]
+package = false

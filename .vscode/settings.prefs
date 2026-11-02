@@ -1,0 +1,5 @@
+# Eclipse JDT compiler settings for VS Code's Java extension (read through java.settings.url in settings.json).
+# The tests start local HTTP servers with the JDK's com.sun.net.httpserver (module jdk.httpserver, exported).
+# JDT's execution-environment access rules flag it as "Access restriction ... not accessible" in the workspace
+# build, which then refuses to launch TestDrive; Maven compiles it without complaint. Report it as a warning.
+org.eclipse.jdt.core.compiler.problem.forbiddenReference=warning

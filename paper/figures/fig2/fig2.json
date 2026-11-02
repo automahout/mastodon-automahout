@@ -1,0 +1,57 @@
+{
+ "datasets": [
+  {
+   "name": "Fluo-N2DL-HeLa",
+   "image": "Fluo-N2DL-HeLa/01/t091.tif",
+   "res": "drift/Fluo-N2DL-HeLa/01/new/repfull_cpsam/RES/mask091.tif",
+   "truth": "Fluo-N2DL-HeLa/01_GT/TRA/man_track091.tif",
+   "voxel": [
+    0.645,
+    0.645,
+    0.645
+   ],
+   "t": 91,
+   "metrics": "data/Fluo-N2DL-HeLa_01/metrics.json",
+   "detector": "cellpose.cpsam",
+   "detector_label": "Cellpose-SAM",
+   "short": "HeLa",
+   "leaves": 8
+  },
+  {
+   "name": "PhC-C2DL-PSC",
+   "image": "PhC-C2DL-PSC/01/t150.tif",
+   "res": "drift/PhC-C2DL-PSC/01/new/repfull_cpsam/RES/mask150.tif",
+   "truth": "PhC-C2DL-PSC/01_GT/TRA/man_track150.tif",
+   "voxel": [
+    1.6,
+    1.6,
+    1.6
+   ],
+   "t": 150,
+   "metrics": "data/PhC-C2DL-PSC_01/metrics.json",
+   "detector": "cellpose.cpsam",
+   "detector_label": "Cellpose-SAM",
+   "short": "PSC",
+   "leaves": 18
+  },
+  {
+   "name": "Fluo-N3DH-CE",
+   "image": "Fluo-N3DH-CE/01/t150.tif",
+   "res": "drift/Fluo-N3DH-CE/01/new/repfull_zfix/RES/mask150.tif",
+   "truth": "Fluo-N3DH-CE/01_GT/TRA/man_track150.tif",
+   "voxel": [
+    0.09,
+    0.09,
+    1.0
+   ],
+   "t": 150,
+   "z": 17,
+   "dz": 2.5,
+   "metrics": "data/Fluo-N3DH-CE_01/metrics.json",
+   "detector": "elephant",
+   "detector_label": "ELEPHANT",
+   "short": "CE embryo",
+   "leaves": 41
+  }
+ ]
+}

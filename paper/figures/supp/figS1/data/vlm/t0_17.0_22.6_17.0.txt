@@ -1,0 +1,3 @@
+```json
+{"nucleus": true, "reasoning": "The spot shows a bright, well-defined circular structure with internal texture consistent with a cell nucleus, and the intensity is substantially above background noise in both the focal plane and projection views."}
+```

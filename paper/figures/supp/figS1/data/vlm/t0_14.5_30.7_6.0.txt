@@ -1,0 +1,3 @@
+```json
+{"nucleus": false, "reasoning": "The spot shows a bright compact core in the plane view with a much larger diffuse halo in the projection, which is characteristic of out-of-focus debris or an optical artifact rather than the homogeneous intensity distribution expected of a true nucleus."}
+```

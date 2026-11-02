@@ -1,0 +1,198 @@
+
+The following files have been resolved:
+   org.mastodon:mastodon:jar:1.0.0-beta-35:compile[36m -- module org.mastodon[0;1m [auto][m
+   org.mastodon:mastodon-graph:jar:1.0.0-beta-30:compile[36m -- module org.mastodon[0;1m [auto][m
+   org.mastodon:mastodon-collection:jar:1.0.0-beta-30:compile[36m -- module org.mastodon[0;1m [auto][m
+   sc.fiji:bigdataviewer-core:jar:10.6.4:compile[36m -- module org.bigdataviewer.core[0;1m [auto][m
+   net.imglib2:imglib2-algorithm:jar:0.18.1:compile[36m -- module net.imglib2.algorithm[0;1m [auto][m
+   org.ojalgo:ojalgo:jar:45.1.1:compile[36m -- module ojalgo[0;1;33m (auto)[m
+   net.imglib2:imglib2-cache:jar:1.0.0-beta-19:compile[36m -- module net.imglib2.cache[0;1m [auto][m
+   com.github.ben-manes.caffeine:caffeine:jar:2.9.3:compile[36m -- module com.github.benmanes.caffeine[0;1m [auto][m
+   org.janelia.saalfeldlab:n5:jar:3.5.0:compile[36m -- module org.janelia.saalfeldlab.n5[0;1m [auto][m
+   org.tukaani:xz:jar:1.10:compile[36m -- module org.tukaani.xz[m
+   org.lz4:lz4-java:jar:1.9-inv:compile[36m -- module org.lz4.java[0;1m [auto][m
+   org.scijava:scijava-listeners:jar:1.0.0-beta-3:compile[36m -- module org.scijava.listeners[0;1m [auto][m
+   com.formdev:flatlaf:jar:3.5.4:compile[36m -- module com.formdev.flatlaf[m
+   com.google.code.gson:gson:jar:2.10.1:compile[36m -- module com.google.gson[m
+   dev.dirs:directories:jar:26:compile[36m -- module dev.dirs[0;1m [auto][m
+   org.jdom:jdom2:jar:2.0.6.1:compile[36m -- module org.jdom2[0;1m [auto][m
+   org.yaml:snakeyaml:jar:2.3:compile[36m -- module org.yaml.snakeyaml[m
+   sc.fiji:bigdataviewer-vistools:jar:1.0.0-beta-36:compile[36m -- module bdv.util[0;1m [auto][m
+   sc.fiji:bigdataviewer_fiji:jar:6.4.1:compile[36m -- module bdv.ij[0;1m [auto][m
+   sc.fiji:SPIM_Registration:jar:5.0.26:compile[36m -- module sc.fiji.___egistration[0;1m [auto][m
+   sc.fiji:Fiji_Plugins:jar:3.1.3:compile
+   net.imglib2:imglib2-algorithm-gpl:jar:0.3.1:compile[36m -- module net.imglib2.algorithm.gpl[0;1m [auto][m
+   net.imglib2:imglib2-algorithm-fft:jar:0.2.1:compile[36m -- module net.imglib2.algorithm.fft2[0;1m [auto][m
+   ome:formats-api:jar:8.2.0:compile[36m -- module formats.api[0;1;33m (auto)[m
+   org.openmicroscopy:ome-codecs:jar:1.1.0:compile[36m -- module ome.codecs[0;1;33m (auto)[m
+   org.openmicroscopy:ome-jai:jar:0.1.4:compile[36m -- module ome.jai[0;1;33m (auto)[m
+   ome:formats-bsd:jar:8.2.0:compile[36m -- module formats.bsd[0;1;33m (auto)[m
+   org.openmicroscopy:specification:jar:6.4.0:compile[36m -- module specification[0;1;33m (auto)[m
+   ome:turbojpeg:jar:8.2.0:compile
+   org.scijava:native-lib-loader:jar:2.5.0:compile[36m -- module org.scijava.nativelib[0;1m [auto][m
+   com.jgoodies:jgoodies-forms:jar:1.7.2:compile[36m -- module jgoodies.forms[0;1;33m (auto)[m
+   com.jgoodies:jgoodies-common:jar:1.7.0:compile[36m -- module jgoodies.common[0;1;33m (auto)[m
+   com.esotericsoftware:kryo:jar:5.6.0:compile[36m -- module com.esotericsoftware.kryo[0;1m [auto][m
+   com.esotericsoftware:reflectasm:jar:1.11.9:compile[36m -- module com.esotericsoftware.reflectasm[0;1m [auto][m
+   org.objenesis:objenesis:jar:3.4:compile[36m -- module org.objenesis[0;1m [auto][m
+   com.esotericsoftware:minlog:jar:1.3.1:compile[36m -- module com.esotericsoftware.minlog[0;1m [auto][m
+   org.perf4j:perf4j:jar:0.9.16:compile[36m -- module perf4j[0;1;33m (auto)[m
+   com.drewnoakes:metadata-extractor:jar:2.18.0:compile[36m -- module metadata.extractor[0;1;33m (auto)[m
+   com.adobe.xmp:xmpcore:jar:6.1.11:compile[36m -- module xmpcore[0;1;33m (auto)[m
+   ome:jxrlib-all:jar:0.2.4:compile[36m -- module jxrlib.all[0;1;33m (auto)[m
+   org.json:json:jar:20240303:compile[36m -- module org.json[m
+   xerces:xercesImpl:jar:2.12.2:compile[36m -- module xercesImpl[0;1;33m (auto)[m
+   xml-apis:xml-apis:jar:1.4.01:compile[36m -- module xml.apis[0;1;33m (auto)[m
+   io.airlift:aircompressor:jar:2.0.3:compile[36m -- module aircompressor[0;1;33m (auto)[m
+   org.openmicroscopy:ome-xml:jar:6.4.0:compile[36m -- module ome.xml[0;1;33m (auto)[m
+   org.openmicroscopy:ome-common:jar:6.0.25:compile[36m -- module ome.common[0;1;33m (auto)[m
+   io.minio:minio:jar:8.6.0:compile[36m -- module minio[0;1;33m (auto)[m
+   com.carrotsearch.thirdparty:simple-xml-safe:jar:2.7.1:compile[36m -- module simple.xml.safe[0;1;33m (auto)[m
+   org.bouncycastle:bcprov-jdk18on:jar:1.81:compile[36m -- module org.bouncycastle.provider[m
+   org.xerial.snappy:snappy-java:jar:1.1.10.7:compile[36m -- module snappy.java[0;1;33m (auto)[m
+   joda-time:joda-time:jar:2.13.0:compile[36m -- module org.joda.time[0;1m [auto][m
+   net.java.dev.jna:jna:jar:5.14.0:compile[36m -- module com.sun.jna[0;1m [auto][m
+   org.apache.commons:commons-compress:jar:1.27.1:compile[36m -- module org.apache.commons.compress[m
+   commons-codec:commons-codec:jar:1.17.1:compile[36m -- module org.apache.commons.codec[m
+   commons-lang:commons-lang:jar:2.6:compile[36m -- module commons.lang[0;1;33m (auto)[m
+   sc.fiji:fiji-lib:jar:2.1.3:compile[36m -- module sc.fiji.fiji_lib[0;1m [auto][m
+   sc.fiji:legacy-imglib1:jar:1.1.11:compile[36m -- module sc.fiji.legacy_imglib1[0;1m [auto][m
+   edu.mines:mines-jtk:jar:20151125:compile[36m -- module mines.jtk[0;1;33m (auto)[m
+   org.jogamp.java3d:vecmath:jar:1.7.2:compile[36m -- module vecmath[0;1;33m (auto)[m
+   sc.fiji:SPIM_Opener:jar:2.0.2:compile[36m -- module SPIM.Opener[0;1;33m (auto)[m
+   mpicbg:mpicbg:jar:1.6.0:compile[36m -- module mpicbg.mpicbg[0;1m [auto][m
+   sc.fiji:spim_data:jar:2.3.5:compile[36m -- module mpicbg.spim.data[0;1m [auto][m
+   cisd:jhdf5:jar:19.04.1:compile[36m -- module jhdf5[0;1;33m (auto)[m
+   cisd:base:jar:18.09.0:compile[36m -- module base[0;1;33m (auto)[m
+   commons-io:commons-io:jar:2.17.0:compile[36m -- module org.apache.commons.io[m
+   org.apache.commons:commons-lang3:jar:3.17.0:compile[36m -- module org.apache.commons.lang3[m
+   org.scijava:ui-behaviour:jar:2.0.8:compile[36m -- module org.scijava.ui.behaviour[0;1m [auto][m
+   net.imglib2:imglib2:jar:7.1.5:compile[36m -- module net.imglib2[0;1m [auto][m
+   net.imglib2:imglib2-roi:jar:0.15.2:compile[36m -- module net.imglib2.roi[0;1m [auto][m
+   org.janelia.saalfeldlab:n5-universe:jar:2.3.0:compile[36m -- module org.janelia.saalfeldlab.n5.universe[0;1m [auto][m
+   org.janelia.saalfeldlab:n5-imglib2:jar:7.0.2:compile[36m -- module org.janelia.saalfeldlab.n5.imglib2[0;1m [auto][m
+   org.janelia.saalfeldlab:n5-hdf5:jar:2.2.1:compile[36m -- module org.janelia.saalfeldlab.n5.hdf5[0;1m [auto][m
+   net.thisptr:jackson-jq:jar:1.0.0-preview.20191208:compile[36m -- module jackson.jq[0;1;33m (auto)[m
+   org.jruby.joni:joni:jar:2.2.1:compile[36m -- module org.jruby.joni[m
+   org.jruby.jcodings:jcodings:jar:1.0.58:compile[36m -- module org.jruby.jcodings[m
+   se.sawano.java:alphanumeric-comparator:jar:1.4.1:compile[36m -- module alphanumeric.comparator[0;1;33m (auto)[m
+   org.janelia.saalfeldlab:n5-google-cloud:jar:5.1.0:compile[36m -- module org.janelia.saalfeldlab.n5.googlecloud[0;1m [auto][m
+   com.google.cloud:google-cloud-storage:jar:2.34.0:compile[36m -- module google.cloud.storage[0;1;33m (auto)[m
+   com.google.guava:guava:jar:33.3.1-jre:compile[36m -- module com.google.common[0;1m [auto][m
+   com.google.guava:failureaccess:jar:1.0.2:compile[36m -- module com.google.common.util.concurrent.internal[0;1m [auto][m
+   com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava:compile[36m -- module listenablefuture[0;1;33m (auto)[m
+   com.google.errorprone:error_prone_annotations:jar:2.32.0:compile[36m -- module com.google.errorprone.annotations[m
+   com.google.j2objc:j2objc-annotations:jar:3.0.0:compile[36m -- module com.google.j2objc.annotations[m
+   com.google.http-client:google-http-client:jar:1.45.0:compile[36m -- module com.google.api.client[0;1m [auto][m
+   io.grpc:grpc-context:jar:1.68.0:compile[36m -- module grpc.context[0;1;33m (auto)[m
+   io.opencensus:opencensus-contrib-http-util:jar:0.31.1:compile[36m -- module opencensus.contrib.http.util[0;1;33m (auto)[m
+   com.google.http-client:google-http-client-jackson2:jar:1.45.0:compile[36m -- module com.google.api.client.json.jackson2[0;1m [auto][m
+   com.google.http-client:google-http-client-gson:jar:1.45.0:compile[36m -- module com.google.api.client.json.gson[0;1m [auto][m
+   com.google.api-client:google-api-client:jar:2.7.0:compile[36m -- module google.api.client[0;1m [auto][m
+   com.google.oauth-client:google-oauth-client:jar:1.36.0:compile[36m -- module com.google.api.client.auth[0;1m [auto][m
+   com.google.http-client:google-http-client-apache-v2:jar:1.45.0:compile[36m -- module com.google.api.client.http.apache.v2[0;1m [auto][m
+   com.google.apis:google-api-services-storage:jar:v1-rev20240209-2.0.0:compile[36m -- module com.google.api.services.storage[0;1m [auto][m
+   com.google.cloud:google-cloud-core:jar:2.33.0:compile[36m -- module google.cloud.core[0;1;33m (auto)[m
+   com.google.auto.value:auto-value-annotations:jar:1.11.0:compile[36m -- module auto.value.annotations[0;1;33m (auto)[m
+   com.google.cloud:google-cloud-core-http:jar:2.33.0:compile[36m -- module google.cloud.core.http[0;1;33m (auto)[m
+   com.google.http-client:google-http-client-appengine:jar:1.45.0:compile[36m -- module com.google.api.client.extensions.appengine[0;1m [auto][m
+   com.google.api:gax-httpjson:jar:2.54.1:compile[36m -- module gax.httpjson[0;1;33m (auto)[m
+   com.google.cloud:google-cloud-core-grpc:jar:2.33.0:compile[36m -- module google.cloud.core.grpc[0;1;33m (auto)[m
+   com.google.api:gax:jar:2.54.1:compile[36m -- module gax[0;1;33m (auto)[m
+   com.google.api:gax-grpc:jar:2.54.1:compile[36m -- module gax.grpc[0;1;33m (auto)[m
+   io.grpc:grpc-inprocess:jar:1.68.0:compile[36m -- module io.grpc.inprocess[0;1m [auto][m
+   io.grpc:grpc-alts:jar:1.68.0:compile[36m -- module io.grpc.alts[0;1m [auto][m
+   io.grpc:grpc-grpclb:jar:1.68.0:compile[36m -- module io.grpc.grpclb[0;1m [auto][m
+   org.conscrypt:conscrypt-openjdk-uber:jar:2.5.2:compile[36m -- module org.conscrypt[0;1m [auto][m
+   io.grpc:grpc-auth:jar:1.68.0:compile[36m -- module io.grpc.auth[0;1m [auto][m
+   io.grpc:grpc-protobuf:jar:1.68.0:compile[36m -- module io.grpc.protobuf[0;1m [auto][m
+   com.google.auth:google-auth-library-credentials:jar:1.27.0:compile[36m -- module com.google.auth[0;1m [auto][m
+   com.google.auth:google-auth-library-oauth2-http:jar:1.27.0:compile[36m -- module com.google.auth.oauth2[0;1m [auto][m
+   com.google.api:api-common:jar:2.37.1:compile[36m -- module com.google.api.apicommon[0;1m [auto][m
+   javax.annotation:javax.annotation-api:jar:1.3.2:compile[36m -- module java.annotation[0;1m [auto][m
+   io.opencensus:opencensus-api:jar:0.31.1:compile[36m -- module opencensus.api[0;1;33m (auto)[m
+   com.google.api.grpc:proto-google-iam-v1:jar:1.40.1:compile[36m -- module proto.google.iam.v1[0;1;33m (auto)[m
+   com.google.protobuf:protobuf-java:jar:4.28.2:compile[36m -- module com.google.protobuf[0;1m [auto][m
+   com.google.protobuf:protobuf-java-util:jar:4.28.2:compile[36m -- module com.google.protobuf.util[0;1m [auto][m
+   com.google.api.grpc:proto-google-common-protos:jar:2.45.1:compile[36m -- module proto.google.common.protos[0;1;33m (auto)[m
+   org.threeten:threetenbp:jar:1.7.0:compile[36m -- module org.threeten.bp[0;1m [auto][m
+   com.google.api.grpc:proto-google-cloud-storage-v2:jar:2.34.0-alpha:compile[36m -- module proto.google.cloud.storage.v2[0;1;33m (auto)[m
+   com.google.api.grpc:grpc-google-cloud-storage-v2:jar:2.34.0-alpha:compile[36m -- module grpc.google.cloud.storage.v2[0;1;33m (auto)[m
+   com.google.api.grpc:gapic-google-cloud-storage-v2:jar:2.34.0-alpha:compile[36m -- module gapic.google.cloud.storage.v2[0;1;33m (auto)[m
+   io.grpc:grpc-api:jar:1.68.0:compile[36m -- module io.grpc[0;1m [auto][m
+   io.grpc:grpc-netty-shaded:jar:1.70.0:compile[36m -- module io.grpc.netty.shaded[0;1m [auto][m
+   io.grpc:grpc-core:jar:1.68.0:compile[36m -- module io.grpc.internal[0;1m [auto][m
+   io.grpc:grpc-stub:jar:1.68.0:compile[36m -- module io.grpc.stub[0;1m [auto][m
+   org.checkerframework:checker-qual:jar:3.48.0:compile[36m -- module org.checkerframework.checker.qual[m
+   com.google.cloud:google-cloud-resourcemanager:jar:1.38.0:compile[36m -- module google.cloud.resourcemanager[0;1;33m (auto)[m
+   com.google.api.grpc:proto-google-cloud-resourcemanager-v3:jar:1.38.0:compile[36m -- module proto.google.cloud.resourcemanager.v3[0;1;33m (auto)[m
+   com.google.apis:google-api-services-cloudresourcemanager:jar:v1-rev20240128-2.0.0:compile[36m -- module com.google.api.services.cloudresourcemanager[0;1m [auto][m
+   org.apache.httpcomponents:httpclient:jar:4.5.14:compile[36m -- module org.apache.httpcomponents.httpclient[0;1m [auto][m
+   org.apache.httpcomponents:httpcore:jar:4.4.16:compile[36m -- module org.apache.httpcomponents.httpcore[0;1m [auto][m
+   org.janelia.saalfeldlab:n5-aws-s3:jar:4.3.0:compile[36m -- module org.janelia.saalfeldlab.n5.s3[0;1m [auto][m
+   com.amazonaws:aws-java-sdk-s3:jar:1.12.772:compile[36m -- module aws.java.sdk.s3[0;1;33m (auto)[m
+   com.amazonaws:aws-java-sdk-kms:jar:1.12.772:compile[36m -- module aws.java.sdk.kms[0;1;33m (auto)[m
+   com.amazonaws:aws-java-sdk-core:jar:1.12.772:compile[36m -- module aws.java.sdk.core[0;1;33m (auto)[m
+   com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:jar:2.18.0:compile[36m -- module com.fasterxml.jackson.dataformat.cbor[m
+   com.amazonaws:jmespath-java:jar:1.12.772:compile[36m -- module jmespath.java[0;1;33m (auto)[m
+   com.google.code.findbugs:jsr305:jar:3.0.2:compile[36m -- module jsr305[0;1;33m (auto)[m
+   org.janelia.saalfeldlab:n5-viewer_fiji:jar:6.1.2:compile[36m -- module org.janelia.saalfeldlab.n5.bdv[0;1m [auto][m
+   org.janelia:n5-zstandard:jar:1.0.2:compile[36m -- module org.janelia.scicomp.n5.zstandard[0;1m [auto][m
+   com.github.luben:zstd-jni:jar:1.5.6-6:compile[36m -- module com.github.luben.zstd_jni[m
+   org.janelia.saalfeldlab:n5-ij:jar:4.4.0:compile[36m -- module org.janelia.saalfeldlab.n5.ij[0;1m [auto][m
+   org.janelia.saalfeldlab:n5-blosc:jar:1.1.1:compile[36m -- module org.janelia.saalfeldlab.n5.blosc[0;1m [auto][m
+   org.lasersonlab:jblosc:jar:1.0.1:compile[36m -- module jblosc[0;1;33m (auto)[m
+   net.imglib2:imglib2-label-multisets:jar:0.15.1:compile[36m -- module net.imglib2.type.label[0;1m [auto][m
+   com.fasterxml.jackson.core:jackson-databind:jar:2.18.0:compile[36m -- module com.fasterxml.jackson.databind[m
+   com.fasterxml.jackson.core:jackson-annotations:jar:2.18.0:compile[36m -- module com.fasterxml.jackson.annotation[m
+   com.fasterxml.jackson.core:jackson-core:jar:2.18.0:compile[36m -- module com.fasterxml.jackson.core[m
+   info.picocli:picocli:jar:4.7.6:compile[36m -- module info.picocli[m
+   org.janelia.saalfeldlab:n5-zarr:jar:1.5.1:compile[36m -- module org.janelia.saalfeldlab.n5.zarr[0;1m [auto][m
+   com.opencsv:opencsv:jar:5.9:compile[36m -- module com.opencsv[0;1m [auto][m
+   org.apache.commons:commons-text:jar:1.12.0:compile[36m -- module org.apache.commons.text[m
+   commons-beanutils:commons-beanutils:jar:1.11.0:compile[36m -- module org.apache.commons.beanutils[m
+   commons-logging:commons-logging:jar:1.3.4:compile[36m -- module org.apache.commons.logging[m
+   commons-collections:commons-collections:jar:3.2.2:compile[36m -- module commons.collections[0;1;33m (auto)[m
+   org.apache.commons:commons-collections4:jar:4.5.0:compile[36m -- module org.apache.commons.collections4[m
+   io.humble:humble-video-all:jar:0.3.0:compile[36m -- module humble.video.all[0;1;33m (auto)[m
+   io.humble:humble-video-noarch:jar:0.3.0:compile[36m -- module humble.video.noarch[0;1;33m (auto)[m
+   org.jfree:jfreesvg:jar:3.4.3:compile[36m -- module org.jfree.jfreesvg[0;1m [auto][m
+   org.slf4j:slf4j-api:jar:1.7.36:compile[36m -- module org.slf4j[0;1m [auto][m
+   io.scif:scifio:jar:0.46.0:compile[36m -- module io.scif[0;1m [auto][m
+   io.scif:scifio-jai-imageio:jar:1.1.1:compile[36m -- module scifio.jai.imageio[0;1;33m (auto)[m
+   net.imagej:ij1-patcher:jar:2.0.0:compile[36m -- module net.imagej.patcher[0;1m [auto][m
+   io.github.classgraph:classgraph:jar:4.8.162:compile[36m -- module io.github.classgraph[m
+   net.imagej:ij:jar:1.54p:compile[36m -- module ij[m
+   net.imagej:imagej-common:jar:2.1.1:compile[36m -- module net.imagej[0;1m [auto][m
+   edu.ucar:udunits:jar:4.3.18:compile[36m -- module udunits[0;1;33m (auto)[m
+   net.imagej:imagej-deprecated:jar:0.2.0:compile[36m -- module net.imagej.deprecated[0;1m [auto][m
+   net.imglib2:imglib2-ij:jar:2.0.3:compile[36m -- module net.imglib2.img[0;1m [auto][m
+   net.imglib2:imglib2-realtransform:jar:4.0.4:compile[36m -- module net.imglib2.realtransform[0;1m [auto][m
+   gov.nist.math:jama:jar:1.0.3:compile[36m -- module jama[0;1;33m (auto)[m
+   jitk:jitk-tps:jar:3.0.4:compile[36m -- module jitk.spline[0;1m [auto][m
+   org.ejml:ejml-all:jar:0.41:compile[36m -- module ejml.all[0;1;33m (auto)[m
+   org.ejml:ejml-core:jar:0.41:compile[36m -- module ejml.core[0;1;33m (auto)[m
+   org.ejml:ejml-fdense:jar:0.41:compile[36m -- module ejml.fdense[0;1;33m (auto)[m
+   org.ejml:ejml-ddense:jar:0.41:compile[36m -- module ejml.ddense[0;1;33m (auto)[m
+   org.ejml:ejml-cdense:jar:0.41:compile[36m -- module ejml.cdense[0;1;33m (auto)[m
+   org.ejml:ejml-zdense:jar:0.41:compile[36m -- module ejml.zdense[0;1;33m (auto)[m
+   org.ejml:ejml-dsparse:jar:0.41:compile[36m -- module ejml.dsparse[0;1;33m (auto)[m
+   org.ejml:ejml-simple:jar:0.41:compile[36m -- module ejml.simple[0;1;33m (auto)[m
+   org.ejml:ejml-fsparse:jar:0.41:compile[36m -- module ejml.fsparse[0;1;33m (auto)[m
+   org.scijava:scijava-common:jar:2.99.2:compile[36m -- module org.scijava[0;1m [auto][m
+   org.scijava:parsington:jar:3.1.0:compile[36m -- module org.scijava.parsington[0;1m [auto][m
+   org.scijava:scijava-table:jar:1.0.2:compile[36m -- module org.scijava.table[0;1m [auto][m
+   org.scijava:scijava-optional:jar:1.0.1:compile[36m -- module org.scijava.optional[0;1m [auto][m
+   org.jfree:jfreechart:jar:1.5.5:compile[36m -- module org.jfree.jfreechart[0;1m [auto][m
+   com.squareup.okhttp3:okhttp:jar:4.12.0:compile[36m -- module okhttp3[0;1m [auto][m
+   com.squareup.okio:okio:jar:3.9.1:compile[36m -- module okio[0;1;33m (auto)[m
+   com.squareup.okio:okio-jvm:jar:3.9.1:compile[36m -- module okio[0;1m [auto][m
+   org.jetbrains.kotlin:kotlin-stdlib-jdk8:jar:1.9.22:compile[36m -- module kotlin.stdlib.jdk8[m
+   org.jetbrains.kotlin:kotlin-stdlib:jar:1.9.22:compile[36m -- module kotlin.stdlib[m
+   org.jetbrains:annotations:jar:13.0:compile[36m -- module annotations[0;1;33m (auto)[m
+   org.jetbrains.kotlin:kotlin-stdlib-jdk7:jar:1.9.22:compile[36m -- module kotlin.stdlib.jdk7[m
+   com.miglayout:miglayout-swing:jar:5.3:compile[36m -- module miglayout.swing[0;1;33m (auto)[m
+   com.miglayout:miglayout-core:jar:5.3:compile[36m -- module miglayout.core[0;1;33m (auto)[m
+   net.sf.trove4j:trove4j:jar:3.0.3:compile[36m -- module trove4j[0;1;33m (auto)[m
+   org.javassist:javassist:jar:3.30.2-GA:compile[36m -- module org.javassist[0;1m [auto][m
+

@@ -1,0 +1,21 @@
+start,end,radius_um,rounds,outcome,curated_radius_um
+0,9,3.81,4,go,3.65
+10,19,3.73,2,go,3.82
+20,29,3.64,2,go,3.49
+30,39,2.84,2,go,3.01
+40,49,2.78,0,passed before training,3.18
+50,59,2.71,2,go,3.22
+60,69,2.12,0,passed before training,2.84
+70,79,2.58,0,passed before training,2.95
+80,89,2.52,2,go,2.77
+90,99,1.97,0,passed before training,2.60
+100,109,1.95,0,passed before training,2.60
+110,119,1.95,0,passed before training,2.59
+120,129,1.56,0,passed before training,2.30
+130,139,1.56,0,passed before training,2.27
+140,149,1.56,0,passed before training,2.26
+150,159,1.56,0,passed before training,2.26
+160,169,1.56,0,passed before training,2.11
+170,179,1.56,0,passed before training,1.94
+180,189,1.56,0,passed before training,1.91
+190,194,1.56,0,passed before training,1.91

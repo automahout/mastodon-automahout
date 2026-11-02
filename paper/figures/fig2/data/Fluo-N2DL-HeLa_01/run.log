@@ -1,0 +1,220 @@
+  ELEPHANT detection model 'automahout-bench-drift_Fluo-N2DL-HeLa_01_new_repfull_cpsam_detection.pth' created from random weights.
+  Image profile: background 33044 +/- 7, bright tail 33992 (127.9 sigma above it, 3.5% of the frame) — reads as FLUORESCENCE: brightness means signal, so the intensity checks apply and a crop can be judged by measuring it.
+  Measuring the cell size in the image (first, middle and last frame)...
+  Cell size: cell radius 6.37 µm measured in the image -> ELEPHANT detection radius 3.19..15.93 µm, linking distance 25.49 µm (150 blobs)
+  Describing the movie with the vision model (this takes a moment)...
+  Asking jp.anthropic.claude-haiku-4-5-20251001-v1:0 for pre-flight guidance (up to 90s; the dialog opens with the current settings if it takes longer)...
+  ELEPHANT settings from the data: cell radius 6.37 µm measured in the image -> ELEPHANT detection radius 3.19..15.93 µm, linking distance 25.49 µm
+  Questions about merged spots and divisions are off for this run (pre-flight dialog): two tracks running into one detection are split, divisions whose daughters do not move apart are cut, without asking.
+  Starting at t=0 — you set that in the pre-flight dialog, so this run neither resumes from what is already tracked nor takes the agent's own start_timepoint.
+=== Adaptive tracking: 10 windows of 10 tp, t=0..91 ===
+  Structural invariants active — every phase is checked for protected-spot loss (0 spot(s) currently under guard — no protected tag configured, so that check is inert) and for changes outside its declared timepoint range; per-phase limits add detection-ceiling, churn and continuity checks. Violations appear inline as "!! INVARIANT"; silence means every check passed.
+  Image physical size: 709.5 x 451.5 x 0.6 µm
+  Intensity, contrast and evenness are measured on mipmap level 1 of 2 (voxel up to 1.29 µm, a typical cell spanning ~8 voxels). Full resolution costs a block fetch per probe — measured at 150-400 ms EACH on this dataset — and a coarser voxel is an average of the finer ones, so it estimates a cell's mean and evenness better, not worse.
+  No acceptance profile yet for dataset 'Fluo-N2DL-HeLa_01' — will auto-learn one from reliable tracks as they accumulate (no manual labelling needed).
+  Only 0 confirmed spot(s) in this project (need 50). OFF for this run: the debris filter (its size/evenness/brightness thresholds are percentiles of your confirmed cells). The cap on how many detections each window may teach still applies if you stated a cell count — it then keeps the ones standing furthest above the background instead of the ones closest to your confirmed cells. Tag some cells Status > Completed and run Plugins > Automahout > Build GT Annotation Store to turn the rest on.
+  Tool 'cellpose.nuclei' added from http://127.0.0.1:8765 (role DETECT).
+  Tool 'cellpose.cyto3' added from http://127.0.0.1:8765 (role DETECT).
+  Tool 'cellpose.nuclei3d' added from http://127.0.0.1:8765 (role DETECT).
+  Tool 'stardist.fluo' added from http://127.0.0.1:8765 (role DETECT).
+  Tool 'stardist.he' added from http://127.0.0.1:8765 (role DETECT).
+  Tool 'microsam.ais' added from http://127.0.0.1:8766 (role DETECT).
+  Tool 'microsam.ais3d' added from http://127.0.0.1:8766 (role DETECT).
+  Tool 'cellpose.cpsam' added from http://127.0.0.1:8767 (role DETECT).
+  Detector choice: stardist.fluo agrees with the image at F1~0.96 (t=0: 43 detections, precision~1.00 recall~0.83, t=45: 103 detections, precision~1.00 recall~0.99, t=91: 158 detections, precision~1.00 recall~0.95).
+  Detector choice: cellpose.cpsam agrees with the image at F1~0.98 (t=0: 46 detections, precision~1.00 recall~0.94, t=45: 102 detections, precision~0.97 recall~0.99, t=91: 164 detections, precision~0.99 recall~0.98).
+  Detector choice: cellpose.nuclei agrees with the image at F1~0.86 (t=0: 30 detections, precision~1.00 recall~0.61, t=45: 77 detections, precision~1.00 recall~0.79, t=91: 134 detections, precision~1.00 recall~0.86).
+  Detector choice: cellpose.cyto3 agrees with the image at F1~0.95 (t=0: 40 detections, precision~1.00 recall~0.81, t=45: 99 detections, precision~1.00 recall~0.97, t=91: 149 detections, precision~1.00 recall~0.92).
+  Detector choice: microsam.ais agrees with the image at F1~0.97 (t=0: 43 detections, precision~1.00 recall~0.89, t=45: 104 detections, precision~0.98 recall~0.99, t=91: 155 detections, precision~1.00 recall~0.97).
+  Detector: cellpose.cpsam (pretrained, as it is) -- chosen from the image: it agrees with it at F1~0.98 (at least 0.90 needed).
+  Ceiling — you accepted cellpose.cpsam in the trial. Expected cells per frame is now 46 -> 164 (its counts at t=0 and t=91, replacing the agent's guess), and the ceiling 328, as if you had entered it in the pre-flight dialog.
+  Window plan: pretrained.detect (DETECT) -> nn.link (LINK) -> autocorrect.window (CORRECT_DETECTIONS) -> topology.consistency (CORRECT_LINEAGE)
+
+=== Window [t=0..9] (1/10) ===
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=49.1 (CV_temporal=0.06), size=14.3, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 6.6 µm (≈4x the median consecutive-link length over t=0..9).
+  [5/6] Evaluating and correcting...
+  Correction plan, per frame: frame.weak_spots -> frame.small_spots -> frame.sandwiched -> frame.stacked_duplicates -> frame.merge_duplicates -> frame.long_links -> frame.relink -> frame.convergence_links -> frame.trifurcations -> elephant.recover_predecessors -> frame.division_daughters -> frame.orphan_starts -> frame.short_tracklets -> elephant.fill_gaps -> frame.isolated_rescue -> frame.bridge_gaps -> frame.isolated_spots -> elephant.refit_anisotropic -> frame.bridge_after_refit -> frame.isolated_final
+  Correction pass 'frame.sandwiched' is off for this run: it removes a detection wedged between two others along z, a stack's artefact; in 2D it takes ordinary neighbouring cells (measured on PSC 01: 82% of what it deleted were real cells)
+  Correction pass 'frame.stacked_duplicates' is off for this run: it removes a detection wedged between two others along z, a stack's artefact; in 2D it takes ordinary neighbouring cells (measured on PSC 01: 82% of what it deleted were real cells)
+  Correction pass 'elephant.recover_predecessors' is off for this run: it re-detects with ELEPHANT's model, which was not trained on this movie (the detector is cellpose.cpsam); gaps are bridged by the consistency step instead
+  Correction pass 'elephant.fill_gaps' is off for this run: it re-detects with ELEPHANT's model, which was not trained on this movie (the detector is cellpose.cpsam); gaps are bridged by the consistency step instead
+  Correction pass 'elephant.refit_anisotropic' is off for this run: it re-detects with ELEPHANT's model, which was not trained on this movie (the detector is cellpose.cpsam); gaps are bridged by the consistency step instead
+  [5c/6] Topology consistency check over t=0..9...
+  Correction plan, per window's lineage: lineage.unlink_fp -> lineage.converged_tracks -> lineage.thresholds -> lineage.rapid_divisions -> lineage.short_branches -> lineage.relink_free -> lineage.reconnect_orphans -> lineage.close_gaps -> lineage.excess_divisions -> lineage.staying_divisions -> lineage.implausible_divisions -> lineage.unstable_spots -> lineage.co_located_pairs
+  Correction pass 'lineage.converged_tracks' is off for this run: switched off for this run (automahout.passes.disable)
+    refractory rule cut 1 of 1 division(s) it judged too soon after an ancestor division (threshold 18 tp). Ancestor was 6 tp back at the median, 6 at the earliest, 6 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 1 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 3, 0 asked about, 3 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=1, deleted short-branch spots=5, relinked to free detections=1, reconnected tracklets=2, closed gaps=0, de-branched (single-tracked)=3, unstable-deleted=3, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=18, min_branch_len=3, max_disp=6.6, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=4, of which 3 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 1 beyond 3.0 radii
+  [6/6] Validation: continuity=99% (interior spots with both in+out links), mean_track_len=10.1, isolated=2, spots/tp=48.7 (retention=99% of initial 49.1), CV_temporal=0.07, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -3/+0 links -0/+0; TOPOLOGY spots -5/+4 links -11/+456; DETECTION spots -0/+491 links -0/+0
+  [6/6] Detection completeness: 95% (detected vs estimated cell count).
+  NOTE: 2 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 330 reliable track spot(s) (dataset=Fluo-N2DL-HeLa_01, separation=1.29). separation MEDIUM — auto-classify, but verify ambiguous spots.
+
+=== Window [t=10..19] (2/10) ===
+  Expected count: 57.8 spots/tp by t=19 from the run's own growth (doubling every 60 tp, over 10 accepted timepoint(s)); the previous window held 48.7.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=62.2 (CV_temporal=0.07), size=13.5, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 7.1 µm (≈4x the median consecutive-link length over t=0..19).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=0..19...
+    refractory rule cut 5 of 5 division(s) it judged too soon after an ancestor division (threshold 14 tp). Ancestor was 3 tp back at the median, 2 at the earliest, 3 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 2 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 7, 0 asked about, 7 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=5, deleted short-branch spots=2, relinked to free detections=2, reconnected tracklets=7, closed gaps=0, de-branched (single-tracked)=7, unstable-deleted=1, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=14, min_branch_len=3, max_disp=7.1, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=9, of which 6 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 3 beyond 3.0 radii
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=103.2, isolated=1, spots/tp=61.9 (retention=100% of initial 62.2), CV_temporal=0.07, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -1/+0 links -0/+0; TOPOLOGY spots -3/+0 links -37/+652; DETECTION spots -0/+622 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 1 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 885 reliable track spot(s) (dataset=Fluo-N2DL-HeLa_01, separation=1.22). separation MEDIUM — auto-classify, but verify ambiguous spots.
+
+=== Window [t=20..29] (3/10) ===
+  Expected count: 73.9 spots/tp by t=29 from the run's own growth (doubling every 44 tp, over 20 accepted timepoint(s)); the previous window held 61.9.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=69.5 (CV_temporal=0.02), size=13.9, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 7.3 µm (≈4x the median consecutive-link length over t=0..29).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=10..29...
+    refractory rule cut 3 of 3 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 4 tp back at the median, 3 at the earliest, 8 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 1 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 7, 0 asked about, 7 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=3, deleted short-branch spots=1, relinked to free detections=1, reconnected tracklets=8, closed gaps=0, de-branched (single-tracked)=7, unstable-deleted=4, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=7.3, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=7, of which 5 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 2 beyond 3.0 radii
+  [6/6] Validation: continuity=99% (interior spots with both in+out links), mean_track_len=345.5, isolated=0, spots/tp=69.1 (retention=99% of initial 69.5), CV_temporal=0.02, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -4/+0 links -0/+0; TOPOLOGY spots -2/+1 links -34/+726; DETECTION spots -0/+695 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  Auto-learned acceptance profile from 1659 reliable track spot(s) (dataset=Fluo-N2DL-HeLa_01, separation=1.17). separation MEDIUM — auto-classify, but verify ambiguous spots.
+
+=== Window [t=30..39] (4/10) ===
+  Expected count: 82.2 spots/tp by t=39 from the run's own growth (doubling every 52 tp, over 30 accepted timepoint(s)); the previous window held 69.1.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=77.5 (CV_temporal=0.04), size=13.9, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 7.0 µm (≈4x the median consecutive-link length over t=0..39).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=20..39...
+    refractory rule cut 2 of 2 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 6 tp back at the median, 2 at the earliest, 6 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Divisions whose daughters did not move apart: 6, 0 asked about, 6 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=2, deleted short-branch spots=2, relinked to free detections=0, reconnected tracklets=4, closed gaps=0, de-branched (single-tracked)=6, unstable-deleted=0, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=7.0, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=10, of which 6 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 4 beyond 3.0 radii
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=86.3, isolated=3, spots/tp=77.7 (retention=100% of initial 77.5), CV_temporal=0.04, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: TOPOLOGY spots -2/+3 links -26/+796; DETECTION spots -0/+775 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 3 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 2382 reliable track spot(s) (dataset=Fluo-N2DL-HeLa_01, separation=1.13). separation MEDIUM — auto-classify, but verify ambiguous spots.
+
+=== Window [t=40..49] (5/10) ===
+  Expected count: 92.0 spots/tp by t=49 from the run's own growth (doubling every 57 tp, over 40 accepted timepoint(s)); the previous window held 77.7.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=99.1 (CV_temporal=0.08), size=13.1, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 7.0 µm (≈4x the median consecutive-link length over t=0..49).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=30..49...
+    refractory rule cut 10 of 10 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 7 tp back at the median, 1 at the earliest, 16 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 2 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 13, 0 asked about, 13 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=10, deleted short-branch spots=2, relinked to free detections=2, reconnected tracklets=15, closed gaps=1, de-branched (single-tracked)=15, unstable-deleted=4, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=7.0, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=19, of which 13 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 6 beyond 3.0 radii
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=82.7, isolated=2, spots/tp=99.2 (retention=100% of initial 99.1), CV_temporal=0.08, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -4/+0 links -0/+0; TOPOLOGY spots -2/+4 links -39/+1021; DETECTION spots -0/+991 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 2 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 3255 reliable track spot(s) (dataset=Fluo-N2DL-HeLa_01, separation=1.11). separation MEDIUM — auto-classify, but verify ambiguous spots.
+
+=== Window [t=50..59] (6/10) ===
+  Expected count: 110.7 spots/tp by t=59 from the run's own growth (doubling every 50 tp, over 50 accepted timepoint(s)); the previous window held 99.2.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=116.9 (CV_temporal=0.03), size=13.2, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 6.6 µm (≈4x the median consecutive-link length over t=0..59).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=40..59...
+    refractory rule cut 7 of 7 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 2 tp back at the median, 1 at the earliest, 14 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 4 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 13, 0 asked about, 13 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=7, deleted short-branch spots=5, relinked to free detections=4, reconnected tracklets=15, closed gaps=0, de-branched (single-tracked)=17, unstable-deleted=3, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=6.6, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=21, of which 14 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 5 beyond 3.0 radii; 2 sizes differ by more than 2.50x
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=105.9, isolated=2, spots/tp=116.5 (retention=100% of initial 116.9), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -3/+0 links -0/+0; TOPOLOGY spots -5/+2 links -42/+1201; DETECTION spots -0/+1169 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 2 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 4496 reliable track spot(s) (dataset=Fluo-N2DL-HeLa_01, separation=1.15). separation MEDIUM — auto-classify, but verify ambiguous spots.
+
+=== Window [t=60..69] (7/10) ===
+  Expected count: 133.2 spots/tp by t=69 from the run's own growth (doubling every 48 tp, over 60 accepted timepoint(s)); the previous window held 116.5.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=128.7 (CV_temporal=0.02), size=13.5, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 6.1 µm (≈4x the median consecutive-link length over t=0..69).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=50..69...
+  Moved 1 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 9, 0 asked about, 9 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=0, deleted short-branch spots=6, relinked to free detections=1, reconnected tracklets=8, closed gaps=0, de-branched (single-tracked)=9, unstable-deleted=5, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=6.1, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=15, of which 6 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 6 beyond 3.0 radii; 2 sizes differ by more than 2.50x; 1 daughter 1.32x the mother, over 1.25
+  [6/6] Validation: continuity=99% (interior spots with both in+out links), mean_track_len=213.2, isolated=1, spots/tp=127.9 (retention=99% of initial 128.7), CV_temporal=0.01, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -5/+0 links -0/+0; TOPOLOGY spots -8/+2 links -28/+1308; DETECTION spots -0/+1287 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 1 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 5807 reliable track spot(s) (dataset=Fluo-N2DL-HeLa_01, separation=1.12). separation MEDIUM — auto-classify, but verify ambiguous spots.
+
+=== Window [t=70..79] (8/10) ===
+  Expected count: 152.3 spots/tp by t=79 from the run's own growth (doubling every 49 tp, over 70 accepted timepoint(s)); the previous window held 127.9.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=134.8 (CV_temporal=0.03), size=13.7, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 5.8 µm (≈4x the median consecutive-link length over t=0..79).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=60..79...
+    refractory rule cut 11 of 11 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 3 tp back at the median, 2 at the earliest, 20 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 8 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 15, 0 asked about, 15 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=11, deleted short-branch spots=2, relinked to free detections=8, reconnected tracklets=12, closed gaps=0, de-branched (single-tracked)=15, unstable-deleted=2, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=5.8, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=19, of which 12 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 4 beyond 3.0 radii; 1 daughter 3.95x the mother, over 1.25; 1 daughter 1.43x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=89.7, isolated=2, spots/tp=134.6 (retention=100% of initial 134.8), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -2/+0 links -0/+0; TOPOLOGY spots -3/+3 links -60/+1394; DETECTION spots -0/+1348 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 2 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 7117 reliable track spot(s) (dataset=Fluo-N2DL-HeLa_01, separation=1.11). separation MEDIUM — auto-classify, but verify ambiguous spots.
+
+=== Window [t=80..89] (9/10) ===
+  Expected count: 165.9 spots/tp by t=89 from the run's own growth (doubling every 52 tp, over 80 accepted timepoint(s)); the previous window held 134.6.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=150.2 (CV_temporal=0.03), size=13.6, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 5.5 µm (≈4x the median consecutive-link length over t=0..89).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=70..89...
+    refractory rule cut 12 of 12 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 3 tp back at the median, 1 at the earliest, 6 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 8 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 28, 0 asked about, 28 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=12, deleted short-branch spots=8, relinked to free detections=8, reconnected tracklets=24, closed gaps=0, de-branched (single-tracked)=30, unstable-deleted=7, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=5.5, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=33, of which 23 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 6 beyond 3.0 radii; 1 daughter 3.95x the mother, over 1.25; 1 daughter 1.43x the mother, over 1.25
+  [6/6] Validation: continuity=98% (interior spots with both in+out links), mean_track_len=67.8, isolated=7, spots/tp=149.2 (retention=99% of initial 150.2), CV_temporal=0.03, link_density=100% (10/10 tp linked)
+  [6/6] Graph edits: PROBABLY_NOT_A_CELL spots -7/+0 links -0/+0; TOPOLOGY spots -8/+0 links -87/+1567; DETECTION spots -0/+1502 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 7 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 8517 reliable track spot(s) (dataset=Fluo-N2DL-HeLa_01, separation=1.13). separation MEDIUM — auto-classify, but verify ambiguous spots.
+
+=== Window [t=90..91] (10/10) ===
+  Expected count: 162.7 spots/tp by t=91 from the run's own growth (doubling every 55 tp, over 90 accepted timepoint(s)); the previous window held 149.2.
+  [1/6] Detecting with cellpose.cpsam (pretrained, as it is)...
+  Committed detection (cellpose.cpsam): spots/tp=159.5 (CV_temporal=0.03), size=13.4, border=0%
+  [4/6] Linking...
+  Per-frame displacement cap now 5.5 µm (≈4x the median consecutive-link length over t=0..91).
+  [5/6] Evaluating and correcting...
+  [5c/6] Topology consistency check over t=80..91...
+    refractory rule cut 1 of 1 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 1 tp back at the median, 1 at the earliest, 1 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 2 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 18, 0 asked about, 18 branch link(s) cut.
+  [5c/6] Consistency: unlinked fp spots=0, dissolved rapid divisions=1, deleted short-branch spots=0, relinked to free detections=2, reconnected tracklets=16, closed gaps=0, de-branched (single-tracked)=21, unstable-deleted=0, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=5.5, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=26, of which 21 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 4 beyond 3.0 radii; 1 daughter 2.65x the mother, over 1.25
+  [6/6] Validation: continuity=n/a (a 2-tp window has no interior timepoint) (interior spots with both in+out links), mean_track_len=45.6, isolated=6, spots/tp=159.5 (retention=100% of initial 159.5), CV_temporal=0.03, link_density=98% (2/2 tp linked)
+  [6/6] Graph edits: TOPOLOGY spots -0/+0 links -33/+347; DETECTION spots -0/+319 links -0/+0
+  [6/6] Detection completeness: 100% (detected vs estimated cell count).
+  NOTE: 6 isolated spot(s) (no links at all) — likely missed neighbours or false positives at the window edges.
+  Auto-learned acceptance profile from 8828 reliable track spot(s) (dataset=Fluo-N2DL-HeLa_01, separation=1.13). separation MEDIUM — auto-classify, but verify ambiguous spots.
+[fixed steps] adaptive_track: Adaptive tracking complete. 10/10 windows processed. predict_ok=92, link_ok=92, corrected=92 tp. continuity: mean=98%, worst=98% (threshold=70%). Tracks are continuous. recall: worst detection retention=99% of initial, isolated_spots=26. Cells may be MISSING (low retention / isolated spots) — continuity being high does NOT mean all cells were found; consider lowering min_intensity_ratio and re-running before declaring done. completeness: worst=95% (target=65%). Detection looks complete. divisions=94, closest two on one lineage 21 tp apart. The population went 44 -> 164 cells across the measured range, which takes at least 120 division events. The divisions track that growth, so the rising cell count is PROLIFERATION, not over-detection — do not treat it as a false-positive flood.
+    refractory rule cut 29 of 29 division(s) it judged too soon after an ancestor division (threshold 20 tp). Ancestor was 6 tp back at the median, 2 at the earliest, 19 at the latest — the closer these are to 1, the more of them were fabricated rather than real mitoses.
+  Moved 14 link(s) from a neighbour's detection to the cell's own, which had been left with no predecessor.
+  Divisions whose daughters did not move apart: 50, 0 asked about, 50 branch link(s) cut.
+[fixed steps] auto.correct: auto.correct all 92 timepoints: merged=0, filled=41, deleted links=5, deleted spots=2, refit=0; consistency: unlinked fp spots=0, dissolved rapid divisions=29, deleted short-branch spots=1, relinked to free detections=14, reconnected tracklets=32, closed gaps=0, de-branched (single-tracked)=54, unstable-deleted=0, co-located-merged=0, merged-cells-separated=0 frame(s) in 0 merge(s) (min_div_interval=20, min_branch_len=3, max_disp=5.5, divisions_rare=no, stable_min=3 tp, border_min=10 tp, max_gap=3 tp); mid-movie starts=77, of which 52 would pass every gate linkOrphanStarts applies and were still not joined — those are its bugs, not its policy; 19 beyond 3.0 radii; 1 daughter 3.95x the mother, over 1.25; 1 daughter 1.43x the mother, over 1.25; topology: divisions=89, min_div_interval=21 (threshold=auto=20)

@@ -1,0 +1,3 @@
+```json
+{"nucleus": false, "reasoning": "The spot shows irregular, fragmented morphology with poor internal structure consistency across planes, characteristic of debris or nuclear fragments rather than a complete, well-defined nucleus."}
+```

@@ -1,0 +1,2 @@
+# git archive writes the commit hash into this file: a copy made with it (no .git) still names its code.
+.archive-commit export-subst

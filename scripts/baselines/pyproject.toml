@@ -1,0 +1,23 @@
+[project]
+name = "automahout-baselines"
+version = "0.1.0"
+description = "Baseline T of the Automahout benchmark: pretrained masks (StarDist / Cellpose) tracked with Trackastra"
+requires-python = "==3.10.*"
+# Detector versions as in examples/remote-tools (the pretrained detectors condition A uses).
+dependencies = [
+    "trackastra==0.5.6",
+    "cellpose==3.0.10",
+    "stardist==0.9.1",
+    "csbdeep==0.8.0",
+    "tensorflow==2.16.2",
+    "torch==2.4.0",
+    "numpy==1.26.4",
+    "tifffile",
+    "setuptools==72.1.0",
+]
+
+[tool.uv]
+package = false
+# trackastra asks for motile[gurobi]; Gurobi is a commercial solver. motile alone uses ilpy's open-source
+# backend (SCIP) for the ILP mode.
+override-dependencies = ["motile>=1.0"]

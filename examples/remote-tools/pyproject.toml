@@ -1,0 +1,22 @@
+[project]
+name = "automahout-remote-tools"
+version = "0.1.0"
+description = "Example remote tool server for Automahout: pretrained Cellpose and StarDist detectors over HTTP/JSON"
+requires-python = "==3.10.*"
+# Pinned to the versions the benchmark uses (docs/paper/benchmark-protocol.md). No tensorflow-metal: StarDist
+# runs on the CPU, so it gives the same detections on any machine.
+dependencies = [
+    "cellpose==3.0.10",
+    "stardist==0.9.1",
+    "csbdeep==0.8.0",
+    "tensorflow==2.16.2",
+    "torch==2.4.0",
+    "numpy==1.26.4",
+    "scipy==1.14.0",
+    "scikit-image==0.24.0",
+    # stardist 0.9.1 imports pkg_resources, which uv environments do not ship by default
+    "setuptools==72.1.0",
+]
+
+[tool.uv]
+package = false

@@ -1,0 +1,30 @@
+/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.next
+.DS_Store
+.classpath
+.project
+.settings/
+/samples/
+*.ucls
+.idea/
+*.iml
+doc/
+*.bak
+debug.yaml
+/bin/
+
+# uv environments (scripts/paper, examples/remote-tools)
+.venv/
+
+# Crops of our own (unpublished) data: kept locally, not in the repository
+/benchmark/vlm-fp-negatives/images/
+# Crops of Cell Tracking Challenge images (development notes): kept locally, not in the repository
+/benchmark/split-review/*.png
+
+# Built manuscript files (scripts/paper/manuscript_docx.py)
+/build/
+
+# The pre-flight analysis writes its movie description here (AnalyzeVideoTool)
+docs/video_description*.md

@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "TestDrive",
+            "request": "launch",
+            "mainClass": "org.mastodon.mamut.automahout.TestDrive",
+            "projectName": "mastodon-automahout",
+            "vmArgs": "-Xmx16g"
+        },
+        {
+            "type": "java",
+            "name": "TestDrive (benchmark dumps)",
+            "request": "launch",
+            "mainClass": "org.mastodon.mamut.automahout.TestDrive",
+            "projectName": "mastodon-automahout",
+            "env": {
+                "AUTOMAHOUT_ORIGIN_DUMP": "/tmp/origin-dump.tsv",
+                "AUTOMAHOUT_SPLIT_DUMP": "/tmp/split-fixture-v3.tsv"
+            },
+            "vmArgs": "-Xmx16g"
+        },
+        {
+            "type": "java",
+            "name": "TestDrive (as the reported runs)",
+            "request": "launch",
+            "mainClass": "org.mastodon.mamut.automahout.TestDrive",
+            "projectName": "mastodon-automahout",
+            "vmArgs": "-Xmx16g -Dautomahout.passes.disable=lineage.converged_tracks -Dautomahout.remote.servers=http://127.0.0.1:8765,http://127.0.0.1:8766"
+        }
+    ]
+}
