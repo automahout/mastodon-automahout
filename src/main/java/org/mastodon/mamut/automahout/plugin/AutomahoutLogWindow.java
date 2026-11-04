@@ -32,8 +32,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -41,31 +39,21 @@ import java.time.format.DateTimeFormatter;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultCaret;
 
 /**
- * Non-modal log window of Automahout's runs: the log (also written to a file in the temporary directory), a Stop
- * button and a status panel.
+ * Non-modal log window of Automahout's runs: the log (also written to a file in the temporary directory), and a Stop
+ * button.
  *
  * <p>The window remains open after a run finishes so the user can review the log. It can be re-used across
  * multiple runs.</p>
  */
 public class AutomahoutLogWindow
 {
-
-	// ---- colours ----------------------------------------------------------
-
-	private static final Color COLOR_RUNNING = new Color( 0x2E7D32 );  // green
-
-	private static final Color COLOR_STOPPED = new Color( 0xB71C1C );  // red
-
-	private static final Color COLOR_IDLE = Color.DARK_GRAY;
 
 	// ---- timing -----------------------------------------------------------
 
@@ -75,12 +63,6 @@ public class AutomahoutLogWindow
 	// ---- UI components ----------------------------------------------------
 
 	private final JFrame frame;
-
-	private final JLabel phaseLabel;
-
-	private final JLabel timepointLabel;
-
-	private final JProgressBar progressBar;
 
 	private final JTextArea logArea;
 
@@ -96,42 +78,6 @@ public class AutomahoutLogWindow
 		frame = new JFrame( "Automahout" );
 		frame.setDefaultCloseOperation( JFrame.HIDE_ON_CLOSE );
 		frame.setPreferredSize( new Dimension( 520, 420 ) );
-
-		// ---- status panel -------------------------------------------------
-		final JPanel statusPanel = new JPanel( new GridBagLayout() );
-		statusPanel.setBorder( BorderFactory.createCompoundBorder(
-				BorderFactory.createMatteBorder( 0, 0, 1, 0, Color.LIGHT_GRAY ),
-				BorderFactory.createEmptyBorder( 6, 10, 6, 10 ) ) );
-
-		final GridBagConstraints gc = new GridBagConstraints();
-		gc.fill = GridBagConstraints.HORIZONTAL;
-		gc.insets = new Insets( 2, 0, 2, 8 );
-
-		final JLabel phaseHeading = new JLabel( "Phase:" );
-		phaseHeading.setFont( phaseHeading.getFont().deriveFont( Font.BOLD ) );
-		gc.gridx = 0; gc.gridy = 0; gc.weightx = 0;
-		statusPanel.add( phaseHeading, gc );
-
-		phaseLabel = new JLabel( "Idle" );
-		phaseLabel.setForeground( COLOR_IDLE );
-		gc.gridx = 1; gc.weightx = 1;
-		statusPanel.add( phaseLabel, gc );
-
-		final JLabel tpHeading = new JLabel( "Timepoint:" );
-		tpHeading.setFont( tpHeading.getFont().deriveFont( Font.BOLD ) );
-		gc.gridx = 0; gc.gridy = 1; gc.weightx = 0;
-		statusPanel.add( tpHeading, gc );
-
-		timepointLabel = new JLabel( "—" );
-		timepointLabel.setForeground( COLOR_IDLE );
-		gc.gridx = 1; gc.weightx = 1;
-		statusPanel.add( timepointLabel, gc );
-
-		progressBar = new JProgressBar( 0, 100 );
-		progressBar.setStringPainted( true );
-		progressBar.setString( "" );
-		gc.gridx = 0; gc.gridy = 2; gc.gridwidth = 2; gc.weightx = 1;
-		statusPanel.add( progressBar, gc );
 
 		// ---- log area -----------------------------------------------------
 		logArea = new JTextArea();
@@ -169,7 +115,6 @@ public class AutomahoutLogWindow
 
 		// ---- assemble -----------------------------------------------------
 		frame.getContentPane().setLayout( new BorderLayout() );
-		frame.getContentPane().add( statusPanel, BorderLayout.NORTH );
 		frame.getContentPane().add( scrollPane, BorderLayout.CENTER );
 		frame.getContentPane().add( buttonPanel, BorderLayout.SOUTH );
 
@@ -208,24 +153,7 @@ public class AutomahoutLogWindow
 	}
 
 	// -----------------------------------------------------------------------
-	// Status and log
-
-	public void onStatusUpdate( final String phase, final int currentT, final int totalT,
-			final int progressPercent )
-	{
-		SwingUtilities.invokeLater( () -> {
-			phaseLabel.setText( phase );
-			phaseLabel.setForeground( COLOR_RUNNING );
-
-			timepointLabel.setText( "t = " + currentT + "  (" + totalT + " total)" );
-			timepointLabel.setForeground( COLOR_RUNNING );
-
-			progressBar.setValue( progressPercent );
-			progressBar.setString( progressPercent + "%" );
-
-			stopButton.setEnabled( true );
-		} );
-	}
+	// Log
 
 	public void onLogMessage( final String message )
 	{
@@ -258,30 +186,6 @@ public class AutomahoutLogWindow
 		{
 			logFileFailed = true; // the window still has it; never let a file problem stop a run
 		}
-	}
-
-	public void onCompleted()
-	{
-		SwingUtilities.invokeLater( () -> {
-			phaseLabel.setText( "Complete" );
-			phaseLabel.setForeground( COLOR_RUNNING );
-			timepointLabel.setForeground( COLOR_RUNNING );
-			progressBar.setValue( 100 );
-			progressBar.setString( "100%" );
-			stopButton.setEnabled( false );
-			logArea.append( LocalTime.now().format( TIME_FMT ) + "  === Complete ===\n" );
-		} );
-	}
-
-	public void onStopped()
-	{
-		SwingUtilities.invokeLater( () -> {
-			phaseLabel.setText( "Stopped" );
-			phaseLabel.setForeground( COLOR_STOPPED );
-			timepointLabel.setForeground( COLOR_STOPPED );
-			stopButton.setEnabled( false );
-			logArea.append( LocalTime.now().format( TIME_FMT ) + "  === Stopped ===\n" );
-		} );
 	}
 
 }
