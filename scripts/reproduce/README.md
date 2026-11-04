@@ -96,7 +96,7 @@ export AUTOMAHOUT_VLM_MODEL=llava
 | `AUTOMAHOUT_VLM_BASE_URL` | `ollama` | the Ollama server |
 
 Step 00 shows the backend and model it will use. A variable that is not set falls back to what was saved in
-Mastodon's Automahout VLM/LLM settings dialog, then to the code's default (`ollama`, `llava`). Every other
+the VLM / LLM tab of Mastodon's Automahout Settings dialog, then to the code's default (`ollama`, `llava`). Every other
 setting is the code's default; a run never reads the user's tuned settings. Each run's `run-info.json`
 records the backend, model, region and URL, and which environment variable each came from, but never the key.
 To keep a key out of your shell history, put the `export` lines in a file only you can read and `source` it.

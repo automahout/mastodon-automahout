@@ -6,8 +6,8 @@ missing is drawn as a grey placeholder saying what to capture.
 ## The run
 
 Fluo-N3DH-CE 01 in Mastodon (the BigDataViewer XML from `convert_ctc_to_bdv.py`), started from
-Plugins > Automahout, through the first two windows (t = 0-19, about 15-20 min), then stopped with
-Plugins > Automahout > stop. The set-up's defaults, except the training balance: cells at 1x, as in the reported runs.
+Plugins > Automahout > Run Autonomous Tracking..., through the first two windows (t = 0-19, about 15-20 min), then stopped with
+Plugins > Automahout > Stop Automahout. The set-up's defaults, except the training balance: cells at 1x, as in the reported runs.
 
 ## The shots
 
