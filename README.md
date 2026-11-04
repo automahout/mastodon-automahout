@@ -7,10 +7,8 @@ detectors, annotates cells, trains a detection model of its own, tracks, and che
 asking the person only when it cannot decide. Every annotation, detection and link it makes appears in
 Mastodon's own views, where it can be inspected and edited.
 
-This is the version the preprint "Automahout: an autonomous image analysis system for cell tracking" describes
-(tag `preprint-v1`; [paper/README.md](paper/README.md) gives its figures, tables and runs). The run outputs and the
-embryo's trained model are deposited at SSBD:repository, `ssbd-repos-000552`,
-https://doi.org/10.24631/ssbd.repos.2026.11.552. Later versions continue on the repository's `main` branch.
+The preprint, "Automahout: an autonomous image analysis system for cell tracking", describes the version at tag
+[`preprint-v1`](https://github.com/automahout/mastodon-automahout/tree/preprint-v1); `main` continues from it.
 
 ## What it needs
 
@@ -19,7 +17,7 @@ https://doi.org/10.24631/ssbd.repos.2026.11.552. Later versions continue on the 
   starts one on this machine ([docs/elephant-local.md](docs/elephant-local.md)); a server on a GPU machine works
   the same way.
 - **A vision-language model:** a local [Ollama](https://ollama.com) server, the Anthropic API, or Claude through
-  Amazon Bedrock. Choose it in *Plugins › Automahout › Automahout VLM/LLM Settings…*.
+  Amazon Bedrock. Choose it in *Plugins › Automahout › Automahout Settings…* ([docs/settings.md](docs/settings.md)).
   The connection, credentials included, is kept in the user's Java preferences, not in the project.
 - **Optional tool servers** that offer pretrained detectors and shape fitting over HTTP:
   [examples/remote-tools](examples/remote-tools) (Cellpose 3, StarDist), [examples/cellpose-sam](examples/cellpose-sam)
@@ -40,15 +38,11 @@ The plugin's items are under *Plugins › Automahout* in a Mastodon project wind
 
 | Item | What it does |
 |---|---|
-| Run Autonomous Tracking… | a short set-up, then the whole run: detection, training, tracking and correction (the run the preprint describes) |
+| Run Autonomous Tracking… | a short set-up, then the whole run: detection, training, tracking and correction |
 | Stop Automahout | stops the run |
-| Automahout VLM/LLM Settings… | the language-model connection |
-| Automahout Settings… | the tracking parameters ([docs/settings.md](docs/settings.md)) |
+| Automahout Settings… | the language-model connection (VLM / LLM tab), and the tracking range and correction parameters (Tracking tab) |
 | Run a Tool… | runs one of Automahout's tools on its own |
-
-The other items (Run Automahout, Run Automahout (Correct only), Analyze Video (VLM)…, the lineage-constraint and
-ground-truth items, Track Single Window (GT-guided)… and Label Detections TP/FP by OK/NG Example…) are earlier
-development tools, kept in this version as they were; later versions remove most of them.
+| Advanced › | learns lineage constraints from ground truth or from the current spots and links, and builds a ground-truth annotation store |
 
 The log window shows what Automahout measured, decided and corrected; the log is also written to a file in the
 system's temporary folder.
@@ -58,7 +52,7 @@ system's temporary folder.
 | | |
 |---|---|
 | [docs/architecture.md](docs/architecture.md) | the components and the internal evaluation metrics |
-| [docs/settings.md](docs/settings.md) | the fields of the Automahout Settings dialog |
+| [docs/settings.md](docs/settings.md) | every field of the settings dialog |
 | [docs/remote-tools.md](docs/remote-tools.md) | the HTTP protocol for tools in other languages |
 | [docs/writing-a-tool.md](docs/writing-a-tool.md) | writing a tool in Java |
 | [paper/README.md](paper/README.md) | the preprint's figures, tables and runs |
