@@ -50,8 +50,8 @@ import org.scijava.ui.behaviour.util.Actions;
  * <ul>
  *   <li><b>Run Autonomous Tracking...</b> ({@value #ACTION_AUTONOMOUS_TRACKING_NAME}) -- the tracking pipeline.</li>
  *   <li><b>Stop Automahout</b> ({@value #ACTION_STOP_NAME}) -- cancels a running tracking.</li>
- *   <li>the settings dialogs, the lineage-constraint and GT-store tools the pipeline's messages point to, and
- *       <b>Run a Tool...</b>.</li>
+ *   <li><b>Automahout Settings...</b> and <b>Run a Tool...</b>.</li>
+ *   <li><em>Advanced</em>: the lineage-constraint and GT-store tools the pipeline's log messages point to.</li>
  * </ul>
  */
 @Plugin( type = MastodonAutomahoutPlugin.class )
@@ -66,7 +66,6 @@ public class MastodonAutomahoutPlugin implements MamutPlugin
 
 	static final String ACTION_CORRECT_NAME = "automahout correct";
 
-	static final String ACTION_VLM_SETTINGS_NAME = "automahout vlm settings";
 
 	static final String ACTION_ANALYZE_VIDEO_NAME = "automahout analyze video";
 
@@ -90,7 +89,6 @@ public class MastodonAutomahoutPlugin implements MamutPlugin
 	private static final String[] SHORTCUTS_SETTINGS = new String[] { "not mapped" };
 
 
-	private static final String[] SHORTCUTS_VLM_SETTINGS = new String[] { "not mapped" };
 
 
 	private static final String[] SHORTCUTS_AUTONOMOUS_TRACKING = new String[] { "not mapped" };
@@ -123,7 +121,6 @@ public class MastodonAutomahoutPlugin implements MamutPlugin
 	private AutomahoutSettingsAction settingsAction;
 
 
-	private VlmSettingsAction vlmSettingsAction;
 
 
 	private AutonomousTrackingAction autonomousTrackingAction;
@@ -146,7 +143,6 @@ public class MastodonAutomahoutPlugin implements MamutPlugin
 
 		stopAction = new AutomahoutStopAction( loop );
 		settingsAction = new AutomahoutSettingsAction( settings );
-		vlmSettingsAction = new VlmSettingsAction( settings );
 		autonomousTrackingAction = new AutonomousTrackingAction( projectModel, logWindow );
 		learnConstraintsAction = new LearnConstraintsAction( logWindow, settings );
 		learnConstraintsFromModelAction = new LearnConstraintsFromModelAction( projectModel, logWindow, settings );
@@ -166,7 +162,6 @@ public class MastodonAutomahoutPlugin implements MamutPlugin
 	{
 		actions.namedAction( stopAction, SHORTCUTS_STOP );
 		actions.namedAction( settingsAction, SHORTCUTS_SETTINGS );
-		actions.namedAction( vlmSettingsAction, SHORTCUTS_VLM_SETTINGS );
 		actions.namedAction( autonomousTrackingAction, SHORTCUTS_AUTONOMOUS_TRACKING );
 		actions.namedAction( learnConstraintsAction, SHORTCUTS_LEARN_CONSTRAINTS );
 		actions.namedAction( learnConstraintsFromModelAction, SHORTCUTS_LEARN_CONSTRAINTS_MODEL );
@@ -181,11 +176,10 @@ public class MastodonAutomahoutPlugin implements MamutPlugin
 				MamutMenuBuilder.makeFullMenuItem( ACTION_AUTONOMOUS_TRACKING_NAME, "Plugins", "Automahout" ),
 				MamutMenuBuilder.makeFullMenuItem( ACTION_STOP_NAME, "Plugins", "Automahout" ),
 				MamutMenuBuilder.makeFullMenuItem( ACTION_SETTINGS_NAME, "Plugins", "Automahout" ),
-				MamutMenuBuilder.makeFullMenuItem( ACTION_VLM_SETTINGS_NAME, "Plugins", "Automahout" ),
-				MamutMenuBuilder.makeFullMenuItem( ACTION_LEARN_CONSTRAINTS_NAME, "Plugins", "Automahout" ),
-				MamutMenuBuilder.makeFullMenuItem( ACTION_LEARN_CONSTRAINTS_MODEL_NAME, "Plugins", "Automahout" ),
-				MamutMenuBuilder.makeFullMenuItem( ACTION_BUILD_GT_STORE_NAME, "Plugins", "Automahout" ),
-				MamutMenuBuilder.makeFullMenuItem( ACTION_RUN_TOOL_NAME, "Plugins", "Automahout" ) );
+				MamutMenuBuilder.makeFullMenuItem( ACTION_RUN_TOOL_NAME, "Plugins", "Automahout" ),
+				MamutMenuBuilder.makeFullMenuItem( ACTION_LEARN_CONSTRAINTS_NAME, "Plugins", "Automahout", "Advanced" ),
+				MamutMenuBuilder.makeFullMenuItem( ACTION_LEARN_CONSTRAINTS_MODEL_NAME, "Plugins", "Automahout", "Advanced" ),
+				MamutMenuBuilder.makeFullMenuItem( ACTION_BUILD_GT_STORE_NAME, "Plugins", "Automahout", "Advanced" ) );
 	}
 
 	@Override
@@ -194,7 +188,6 @@ public class MastodonAutomahoutPlugin implements MamutPlugin
 		final Map< String, String > texts = new HashMap<>();
 		texts.put( ACTION_STOP_NAME, "Stop Automahout" );
 		texts.put( ACTION_SETTINGS_NAME, "Automahout Settings..." );
-		texts.put( ACTION_VLM_SETTINGS_NAME, "Automahout VLM/LLM Settings..." );
 		texts.put( ACTION_AUTONOMOUS_TRACKING_NAME, "Run Autonomous Tracking..." );
 		texts.put( ACTION_LEARN_CONSTRAINTS_NAME, "Learn Lineage Constraints from GT..." );
 		texts.put( ACTION_LEARN_CONSTRAINTS_MODEL_NAME, "Learn Lineage Constraints from Current Spots and Links..." );
@@ -219,9 +212,7 @@ public class MastodonAutomahoutPlugin implements MamutPlugin
 			descriptions.add( ACTION_STOP_NAME, SHORTCUTS_STOP,
 					"Stop the currently running Automahout loop." );
 			descriptions.add( ACTION_SETTINGS_NAME, SHORTCUTS_SETTINGS,
-					"Open the Automahout settings dialog to configure detection and navigation parameters." );
-			descriptions.add( ACTION_VLM_SETTINGS_NAME, SHORTCUTS_VLM_SETTINGS,
-					"Open the VLM/LLM settings dialog to configure the vision model backend, model name, URL, and API key." );
+					"Open the Automahout settings: the VLM/LLM backend, model and connection, and the tracking range and correction parameters." );
 			descriptions.add( ACTION_AUTONOMOUS_TRACKING_NAME, SHORTCUTS_AUTONOMOUS_TRACKING,
 					"Run the full autonomous tracking pipeline: video analysis, ELEPHANT detection/linking, and LLM-driven autocorrection." );
 			descriptions.add( ACTION_LEARN_CONSTRAINTS_NAME, SHORTCUTS_LEARN_CONSTRAINTS,

@@ -117,7 +117,7 @@ public class AutonomousTrackingTool implements AutomahoutTool
 				apiKey = System.getenv( "ANTHROPIC_API_KEY" );
 			if ( apiKey == null || apiKey.trim().isEmpty() )
 				throw new BackendConfigException( "Anthropic API key not configured. "
-						+ "Set it in 'Automahout VLM/LLM Settings...' "
+						+ "Set it in 'Automahout Settings...' (VLM / LLM tab) "
 						+ "or set the ANTHROPIC_API_KEY environment variable." );
 			return new AnthropicBackend( apiKey );
 		}

@@ -28,6 +28,8 @@
  */
 package org.mastodon.mamut.automahout.plugin;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -38,52 +40,70 @@ import java.awt.Window;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 
 /**
- * Modal settings dialog for the Automahout plugin.
+ * The one settings dialog of the Automahout plugin, in two tabs: <em>VLM / LLM</em> (the vision-language model's
+ * backend, model, connection and the pre-flight's snapshots) and <em>Tracking</em> (the timepoint range and the
+ * correction passes' parameters). Every field here is read by the tracking pipeline.
  *
- * <p>Edits an {@link AutomahoutSettings} instance in-place. Changes are
- * applied and persisted only when the user clicks <em>OK</em>; clicking
- * <em>Cancel</em> leaves the settings object unchanged.</p>
+ * <p>Edits an {@link AutomahoutSettings} instance in place. Changes are applied and persisted only when the user
+ * clicks <em>OK</em>; <em>Cancel</em> leaves the settings unchanged. The URL, API-key and region rows show only for
+ * the backend that uses them.</p>
  *
- * <p>Use the static {@link #show(AutomahoutSettings)} factory method rather
- * than constructing directly.</p>
+ * <p>Use the static {@link #show(AutomahoutSettings)} factory method rather than constructing directly.</p>
  */
 class AutomahoutSettingsDialog extends JDialog
 {
 
 	private static final long serialVersionUID = 1L;
 
-	// ---- spinners -------------------------------------------------------------
+	private static final String BACKEND_OLLAMA = "ollama";
+
+	private static final String BACKEND_ANTHROPIC = "anthropic";
+
+	private static final String BACKEND_BEDROCK = "bedrock";
+
+	// ---- VLM / LLM ------------------------------------------------------------
+
+	private final JComboBox< String > cbBackend;
+
+	private final JTextField tfModel;
+
+	private final JTextField tfBaseUrl;
+
+	private final JLabel lbBaseUrl;
+
+	private final JPasswordField pfApiKey;
+
+	private final JLabel lbApiKey;
+
+	private final JTextField tfAwsRegion;
+
+	private final JLabel lbAwsRegion;
+
+	private final JSpinner spMaxSnapshots;
+
+	private final JSpinner spZSlices;
+
+	private final JTextField tfOutputFile;
+
+	// ---- Tracking -------------------------------------------------------------
 
 	private final JSpinner spStartTimepoint;
 
 	private final JSpinner spEndTimepoint;
 
-	private final JCheckBox cbOpenTrackScheme;
-
-	private final JSpinner spMaxSpots;
-
-	private final JSpinner spMipmapLevel;
-
-	private final JSpinner spStrideXY;
-
-	private final JSpinner spStrideZ;
-
-	private final JSpinner spSuppressionPx;
-
-	private final JSpinner spSpotRadius;
-
-	private final JSpinner spNavigateAnimMs;
-
 	private final JSpinner spMergeOverlapRatio;
-
 
 	private final JCheckBox cbFillGaps;
 
@@ -103,69 +123,69 @@ class AutomahoutSettingsDialog extends JDialog
 
 	private final JSpinner spDivisionLinkFactor;
 
-	// ---- state ----------------------------------------------------------------
-
-	private boolean confirmed = false;
-
 	// -----------------------------------------------------------------------
 
 	private AutomahoutSettingsDialog( final Frame owner, final AutomahoutSettings settings )
 	{
 		super( owner, "Automahout Settings", true );
 
-		// ---- build spinners ---------------------------------------------------
+		// ---- VLM / LLM controls ---------------------------------------------
 
-		spStartTimepoint = new JSpinner( new SpinnerNumberModel(
-				settings.getStartTimepoint(), -1, 9999, 1 ) );
-		spStartTimepoint.setToolTipText(
-				"First timepoint to process.  -1 = use the viewer's current timepoint when Start is clicked" );
+		cbBackend = new JComboBox<>( new String[] { BACKEND_OLLAMA, BACKEND_ANTHROPIC, BACKEND_BEDROCK } );
+		cbBackend.setSelectedItem( settings.getVlmBackend() );
+		cbBackend.setToolTipText(
+				"'ollama' — local Ollama server (no API key needed); "
+						+ "'anthropic' — Anthropic cloud API (requires API key); "
+						+ "'bedrock' — Claude via Amazon Bedrock (AWS credentials + region)" );
 
-		spEndTimepoint = new JSpinner( new SpinnerNumberModel(
-				settings.getEndTimepoint(), -1, 9999, 1 ) );
+		tfModel = new JTextField( settings.getVlmModel(), 24 );
+		tfModel.setToolTipText(
+				"Ollama: e.g. llava, llava:13b, minicpm-v  |  "
+						+ "Anthropic: e.g. claude-opus-4-8, claude-sonnet-5  |  "
+						+ "Bedrock: model/inference-profile id, e.g. "
+						+ "anthropic.claude-3-5-sonnet-20241022-v2:0 or us.anthropic.claude-opus-4-...-v1:0" );
+
+		tfBaseUrl = new JTextField( settings.getVlmBaseUrl(), 24 );
+		tfBaseUrl.setToolTipText( "Base URL of the Ollama server (default: http://localhost:11434)" );
+		lbBaseUrl = new JLabel( "Ollama base URL:" );
+
+		pfApiKey = new JPasswordField( settings.getVlmApiKey(), 24 );
+		pfApiKey.setToolTipText(
+				"Anthropic API key.  Leave empty to use the ANTHROPIC_API_KEY environment variable." );
+		lbApiKey = new JLabel( "Anthropic API key:" );
+
+		tfAwsRegion = new JTextField( settings.getVlmAwsRegion(), 24 );
+		tfAwsRegion.setToolTipText(
+				"AWS region hosting the Bedrock model (e.g. ap-northeast-1). Auth: set a Bedrock API key "
+						+ "via the AWS_BEARER_TOKEN_BEDROCK env var, or use IAM credentials from the SDK "
+						+ "default chain (env vars, ~/.aws/credentials, IAM role)." );
+		lbAwsRegion = new JLabel( "AWS region:" );
+
+		spMaxSnapshots = new JSpinner( new SpinnerNumberModel( settings.getVlmMaxSnapshots(), 1, 64, 1 ) );
+		spMaxSnapshots.setToolTipText( "Number of BDV screenshots captured and sent to the model by the pre-flight" );
+
+		spZSlices = new JSpinner( new SpinnerNumberModel( settings.getVlmZSlicesPerTimepoint(), 1, 16, 1 ) );
+		spZSlices.setToolTipText(
+				"Number of Z slices captured per timepoint (evenly spaced across the Z stack); "
+						+ "1 = current slice only" );
+
+		tfOutputFile = new JTextField( settings.getVlmOutputFile(), 28 );
+		tfOutputFile.setToolTipText(
+				"Path of the Markdown file written by the video.analyze tool "
+						+ "(relative to the working directory or absolute)" );
+
+		// ---- Tracking controls ----------------------------------------------
+
+		spStartTimepoint = new JSpinner( new SpinnerNumberModel( settings.getStartTimepoint(), -1, 9999, 1 ) );
+		spStartTimepoint.setToolTipText( "First timepoint to process.  -1 = the first timepoint of the dataset" );
+
+		spEndTimepoint = new JSpinner( new SpinnerNumberModel( settings.getEndTimepoint(), -1, 9999, 1 ) );
 		spEndTimepoint.setToolTipText(
-				"Last timepoint to process (inclusive).  -1 = use the last timepoint in the dataset" );
-
-		cbOpenTrackScheme = new JCheckBox( "", settings.isOpenTrackScheme() );
-		cbOpenTrackScheme.setToolTipText(
-				"Also open a TrackScheme window in the same group when the loop starts" );
-
-		spMaxSpots = new JSpinner( new SpinnerNumberModel(
-				settings.getMaxSpots(), 1, 1000, 1 ) );
-		spMaxSpots.setToolTipText( "Maximum number of spots added per timepoint" );
-
-		spMipmapLevel = new JSpinner( new SpinnerNumberModel(
-				settings.getMipmapLevel(), -1, 20, 1 ) );
-		spMipmapLevel.setToolTipText(
-				"Mipmap (resolution) level for scanning. -1 = auto (coarsest / fastest), 0 = full resolution" );
-
-		spStrideXY = new JSpinner( new SpinnerNumberModel(
-				settings.getStrideXY(), 1, 64, 1 ) );
-		spStrideXY.setToolTipText(
-				"Voxel sampling stride in X and Y. Higher values scan faster at lower spatial resolution" );
-
-		spStrideZ = new JSpinner( new SpinnerNumberModel(
-				settings.getStrideZ(), 1, 64, 1 ) );
-		spStrideZ.setToolTipText(
-				"Voxel sampling stride in Z. Set to 1 to sample every z-plane" );
-
-		spSuppressionPx = new JSpinner( new SpinnerNumberModel(
-				settings.getSuppressionRadiusPx(), 1.0, 2000.0, 1.0 ) );
-		spSuppressionPx.setToolTipText(
-				"Non-maximum suppression radius in screen pixels. Keeps detected maxima well separated" );
-
-		spSpotRadius = new JSpinner( new SpinnerNumberModel(
-				settings.getSpotRadius(), 0.1, 10000.0, 0.5 ) );
-		spSpotRadius.setToolTipText( "Radius of newly created spots in world units" );
-
-		spNavigateAnimMs = new JSpinner( new SpinnerNumberModel(
-				( int ) settings.getNavigateAnimMs(), 0, 5000, 50 ) );
-		spNavigateAnimMs.setToolTipText(
-				"Duration of the navigate-to pan animation in milliseconds (0 = instant)" );
+				"Last timepoint to process (inclusive).  -1 = the last timepoint of the dataset" );
 
 		spMergeOverlapRatio = new JSpinner( new SpinnerNumberModel(
 				settings.getCorrectMergeOverlapRatio(), 0.0, 5.0, 0.1 ) );
-		spMergeOverlapRatio.setToolTipText(
-				"Merge spots when distance < ratio × max(r1,r2).  0.0 = disabled" );
+		spMergeOverlapRatio.setToolTipText( "Merge spots when distance < ratio × max(r1,r2).  0.0 = disabled" );
 
 		cbFillGaps = new JCheckBox( "", settings.isCorrectFillGaps() );
 		cbFillGaps.setToolTipText(
@@ -183,8 +203,7 @@ class AutomahoutSettingsDialog extends JDialog
 
 		spLongLinkFactor = new JSpinner( new SpinnerNumberModel(
 				settings.getCorrectLongLinkFactor(), 0.5, 50.0, 0.5 ) );
-		spLongLinkFactor.setToolTipText(
-				"Prune links whose distance exceeds this factor × max(r_source, r_target)" );
+		spLongLinkFactor.setToolTipText( "Prune links whose distance exceeds this factor × max(r_source, r_target)" );
 
 		spMinIntensityRatio = new JSpinner( new SpinnerNumberModel(
 				settings.getCorrectMinIntensityRatio(), 0.0, 1.0, 0.05 ) );
@@ -192,16 +211,13 @@ class AutomahoutSettingsDialog extends JDialog
 				"Delete spots whose intensity < ratio × median intensity at timepoint.  0.0 = disabled" );
 
 		cbRefitAnisotropic = new JCheckBox( "", settings.isCorrectRefitAnisotropic() );
-		cbRefitAnisotropic.setToolTipText(
-				"Refit spots with anisotropic covariance via ELEPHANT /seg/predict" );
+		cbRefitAnisotropic.setToolTipText( "Refit spots with anisotropic covariance via ELEPHANT /seg/predict" );
 
 		spAnisotropyThreshold = new JSpinner( new SpinnerNumberModel(
 				settings.getCorrectAnisotropyThreshold(), 1.0, 1000.0, 1.0 ) );
-		spAnisotropyThreshold.setToolTipText(
-				"Refit when max(diag(cov)) / min(diag(cov)) exceeds this threshold" );
+		spAnisotropyThreshold.setToolTipText( "Refit when max(diag(cov)) / min(diag(cov)) exceeds this threshold" );
 
-		spMinSizeRatio = new JSpinner( new SpinnerNumberModel(
-				settings.getCorrectMinSizeRatio(), 0.0, 1.0, 0.05 ) );
+		spMinSizeRatio = new JSpinner( new SpinnerNumberModel( settings.getCorrectMinSizeRatio(), 0.0, 1.0, 0.05 ) );
 		spMinSizeRatio.setToolTipText(
 				"Delete spots whose bounding-sphere radius < ratio × median radius at timepoint.  0.0 = disabled" );
 
@@ -212,66 +228,61 @@ class AutomahoutSettingsDialog extends JDialog
 
 		// ---- lay out ---------------------------------------------------------
 
-		final JPanel content = new JPanel( new GridBagLayout() );
-		content.setBorder( BorderFactory.createEmptyBorder( 8, 12, 4, 12 ) );
-		final GridBagConstraints lc = labelConstraints();
-		final GridBagConstraints fc = fieldConstraints();
+		final Form vlm = new Form();
+		vlm.section( "Backend" );
+		vlm.row( "Backend:", cbBackend );
+		vlm.section( "Model" );
+		vlm.row( "Model name / tag:", tfModel );
+		vlm.section( "Connection" );
+		vlm.row( lbBaseUrl, tfBaseUrl );
+		vlm.row( lbApiKey, pfApiKey );
+		vlm.row( lbAwsRegion, tfAwsRegion );
+		vlm.section( "Pre-flight analysis" );
+		vlm.row( "Max snapshots:", spMaxSnapshots );
+		vlm.row( "Z slices / timepoint:", spZSlices );
+		vlm.row( "Output file:", tfOutputFile );
+		vlm.fill();
 
-		// Loop section
-		addSectionHeader( content, "Loop", lc, fc );
-		addRow( content, "Start timepoint (-1 = current):", spStartTimepoint, lc, fc );
-		addRow( content, "End timepoint (-1 = last):", spEndTimepoint, lc, fc );
-		addCheckBoxRow( content, "Open TrackScheme window:", cbOpenTrackScheme, lc, fc );
+		final Form tracking = new Form();
+		tracking.section( "Range" );
+		tracking.row( "Start timepoint (-1 = first):", spStartTimepoint );
+		tracking.row( "End timepoint (-1 = last):", spEndTimepoint );
+		tracking.section( "Correction" );
+		tracking.row( "Merge overlap ratio (0 = off):", spMergeOverlapRatio );
+		tracking.row( "Fill track gaps:", cbFillGaps );
+		tracking.row( "Gap crop factor:", spGapCropFactor );
+		tracking.row( "Min tracklet length (0=off):", spMinTrackletLength );
+		tracking.row( "Long-link factor:", spLongLinkFactor );
+		tracking.row( "Min intensity ratio (0 = off):", spMinIntensityRatio );
+		tracking.row( "Min size ratio (0 = off):", spMinSizeRatio );
+		tracking.row( "Refit anisotropic spots:", cbRefitAnisotropic );
+		tracking.row( "Anisotropy threshold:", spAnisotropyThreshold );
+		tracking.row( "Division link factor (0 = off):", spDivisionLinkFactor );
+		tracking.fill();
 
-		// Detection section
-		addSectionHeader( content, "Detection", lc, fc );
-		addRow( content, "Max spots per timepoint:", spMaxSpots, lc, fc );
-		addRow( content, "Mipmap level (-1 = auto):", spMipmapLevel, lc, fc );
-		addRow( content, "Stride XY (voxels):", spStrideXY, lc, fc );
-		addRow( content, "Stride Z (voxels):", spStrideZ, lc, fc );
-		addRow( content, "Suppression radius (px):", spSuppressionPx, lc, fc );
+		final JTabbedPane tabs = new JTabbedPane();
+		tabs.addTab( "VLM / LLM", vlm.panel );
+		tabs.addTab( "Tracking", tracking.panel );
 
-		// Spot section
-		addSectionHeader( content, "Spot", lc, fc );
-		addRow( content, "Spot radius (world units):", spSpotRadius, lc, fc );
-
-		// Navigation section
-		addSectionHeader( content, "Navigation", lc, fc );
-		addRow( content, "Navigate animation (ms):", spNavigateAnimMs, lc, fc );
-
-		// Correction section
-		addSectionHeader( content, "Correction", lc, fc );
-		addRow( content, "Merge overlap ratio (0 = off):", spMergeOverlapRatio, lc, fc );
-		addCheckBoxRow( content, "Fill track gaps:", cbFillGaps, lc, fc );
-		addRow( content, "Gap crop factor:", spGapCropFactor, lc, fc );
-		addRow( content, "Min tracklet length (0=off):", spMinTrackletLength, lc, fc );
-		addRow( content, "Long-link factor:", spLongLinkFactor, lc, fc );
-		addRow( content, "Min intensity ratio (0 = off):", spMinIntensityRatio, lc, fc );
-		addRow( content, "Min size ratio (0 = off):", spMinSizeRatio, lc, fc );
-		addCheckBoxRow( content, "Refit anisotropic spots:", cbRefitAnisotropic, lc, fc );
-		addRow( content, "Anisotropy threshold:", spAnisotropyThreshold, lc, fc );
-		addRow( content, "Division link factor (0 = off):", spDivisionLinkFactor, lc, fc );
-
-		// Buttons
 		final JButton okButton = new JButton( "OK" );
 		final JButton cancelButton = new JButton( "Cancel" );
 		okButton.addActionListener( e -> {
 			applyToSettings( settings );
 			settings.save();
-			confirmed = true;
 			dispose();
 		} );
 		cancelButton.addActionListener( e -> dispose() );
-
 		final JPanel buttons = new JPanel();
 		buttons.add( okButton );
 		buttons.add( cancelButton );
 
-		lc.gridwidth = 2;
-		lc.anchor = GridBagConstraints.CENTER;
-		lc.fill = GridBagConstraints.NONE;
-		lc.insets = new Insets( 8, 4, 4, 4 );
-		content.add( buttons, lc );
+		final JPanel content = new JPanel( new BorderLayout() );
+		content.setBorder( BorderFactory.createEmptyBorder( 8, 8, 4, 8 ) );
+		content.add( tabs, BorderLayout.CENTER );
+		content.add( buttons, BorderLayout.SOUTH );
+
+		cbBackend.addActionListener( e -> updateVisibility() );
+		updateVisibility();
 
 		getContentPane().add( content );
 		pack();
@@ -282,36 +293,46 @@ class AutomahoutSettingsDialog extends JDialog
 	// -----------------------------------------------------------------------
 
 	/**
-	 * Opens the settings dialog and blocks until the user closes it.
+	 * Opens the settings dialog.
 	 *
 	 * @param settings the settings object to edit; updated in-place on OK
 	 */
 	static void show( final AutomahoutSettings settings )
 	{
-		final Window active =
-				KeyboardFocusManager.getCurrentKeyboardFocusManager().getActiveWindow();
+		final Window active = KeyboardFocusManager.getCurrentKeyboardFocusManager().getActiveWindow();
 		final Frame owner = ( active instanceof Frame ) ? ( Frame ) active : null;
-		SwingUtilities.invokeLater( () -> {
-			final AutomahoutSettingsDialog dlg =
-					new AutomahoutSettingsDialog( owner, settings );
-			dlg.setVisible( true );
-		} );
+		SwingUtilities.invokeLater( () -> new AutomahoutSettingsDialog( owner, settings ).setVisible( true ) );
 	}
 
 	// -----------------------------------------------------------------------
 
+	private void updateVisibility()
+	{
+		final Object sel = cbBackend.getSelectedItem();
+		final boolean isOllama = BACKEND_OLLAMA.equals( sel );
+		final boolean isAnthropic = BACKEND_ANTHROPIC.equals( sel );
+		final boolean isBedrock = BACKEND_BEDROCK.equals( sel );
+		lbBaseUrl.setVisible( isOllama );
+		tfBaseUrl.setVisible( isOllama );
+		lbApiKey.setVisible( isAnthropic );
+		pfApiKey.setVisible( isAnthropic );
+		lbAwsRegion.setVisible( isBedrock );
+		tfAwsRegion.setVisible( isBedrock );
+	}
+
 	private void applyToSettings( final AutomahoutSettings settings )
 	{
+		settings.setVlmBackend( ( String ) cbBackend.getSelectedItem() );
+		settings.setVlmModel( tfModel.getText().trim() );
+		settings.setVlmBaseUrl( tfBaseUrl.getText().trim() );
+		settings.setVlmApiKey( new String( pfApiKey.getPassword() ) );
+		settings.setVlmAwsRegion( tfAwsRegion.getText().trim() );
+		settings.setVlmMaxSnapshots( ( Integer ) spMaxSnapshots.getValue() );
+		settings.setVlmZSlicesPerTimepoint( ( Integer ) spZSlices.getValue() );
+		settings.setVlmOutputFile( tfOutputFile.getText().trim() );
+
 		settings.setStartTimepoint( ( Integer ) spStartTimepoint.getValue() );
 		settings.setEndTimepoint( ( Integer ) spEndTimepoint.getValue() );
-		settings.setOpenTrackScheme( cbOpenTrackScheme.isSelected() );
-		settings.setMaxSpots( ( Integer ) spMaxSpots.getValue() );
-		settings.setMipmapLevel( ( Integer ) spMipmapLevel.getValue() );
-		settings.setStrideXY( ( Integer ) spStrideXY.getValue() );
-		settings.setStrideZ( ( Integer ) spStrideZ.getValue() );
-		settings.setSuppressionRadiusPx( ( Double ) spSuppressionPx.getValue() );
-		settings.setSpotRadius( ( Double ) spSpotRadius.getValue() );
-		settings.setNavigateAnimMs( ( ( Integer ) spNavigateAnimMs.getValue() ).longValue() );
 		settings.setCorrectMergeOverlapRatio( ( Double ) spMergeOverlapRatio.getValue() );
 		settings.setCorrectFillGaps( cbFillGaps.isSelected() );
 		settings.setCorrectGapCropFactor( ( Double ) spGapCropFactor.getValue() );
@@ -325,73 +346,64 @@ class AutomahoutSettingsDialog extends JDialog
 	}
 
 	// -----------------------------------------------------------------------
-	// Layout helpers
 
-	private static GridBagConstraints labelConstraints()
+	/** One tab's label/field grid, with bold section headers. */
+	private static final class Form
 	{
-		final GridBagConstraints c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.LINE_END;
-		c.fill = GridBagConstraints.NONE;
-		c.insets = new Insets( 3, 4, 3, 6 );
-		return c;
-	}
+		final JPanel panel = new JPanel( new GridBagLayout() );
 
-	private static GridBagConstraints fieldConstraints()
-	{
-		final GridBagConstraints c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.LINE_START;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1.0;
-		c.insets = new Insets( 3, 0, 3, 4 );
-		return c;
-	}
+		private int y = 0;
 
-	private static void addSectionHeader(
-			final JPanel panel,
-			final String title,
-			final GridBagConstraints lc,
-			final GridBagConstraints fc )
-	{
-		final JLabel header = new JLabel( "<html><b>" + title + "</b></html>" );
-		header.setBorder( BorderFactory.createMatteBorder( 0, 0, 1, 0,
-				header.getForeground() ) );
-		final GridBagConstraints hc = ( GridBagConstraints ) lc.clone();
-		hc.gridwidth = 2;
-		hc.anchor = GridBagConstraints.LINE_START;
-		hc.fill = GridBagConstraints.HORIZONTAL;
-		hc.insets = new Insets( 10, 4, 2, 4 );
-		panel.add( header, hc );
-		lc.gridy++;
-		fc.gridy = lc.gridy;
-	}
+		Form()
+		{
+			panel.setBorder( BorderFactory.createEmptyBorder( 4, 8, 4, 8 ) );
+		}
 
-	private static void addRow(
-			final JPanel panel,
-			final String label,
-			final JSpinner spinner,
-			final GridBagConstraints lc,
-			final GridBagConstraints fc )
-	{
-		panel.add( new JLabel( label ), lc );
-		panel.add( spinner, fc );
-		lc.gridy++;
-		fc.gridy = lc.gridy;
-	}
+		void section( final String title )
+		{
+			final JLabel header = new JLabel( "<html><b>" + title + "</b></html>" );
+			header.setBorder( BorderFactory.createMatteBorder( 0, 0, 1, 0, header.getForeground() ) );
+			final GridBagConstraints c = new GridBagConstraints();
+			c.gridx = 0;
+			c.gridy = y++;
+			c.gridwidth = 2;
+			c.anchor = GridBagConstraints.LINE_START;
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.insets = new Insets( 10, 4, 2, 4 );
+			panel.add( header, c );
+		}
 
-	private static void addCheckBoxRow(
-			final JPanel panel,
-			final String label,
-			final JCheckBox checkBox,
-			final GridBagConstraints lc,
-			final GridBagConstraints fc )
-	{
-		panel.add( new JLabel( label ), lc );
-		panel.add( checkBox, fc );
-		lc.gridy++;
-		fc.gridy = lc.gridy;
+		void row( final String label, final Component field )
+		{
+			row( new JLabel( label ), field );
+		}
+
+		void row( final JLabel label, final Component field )
+		{
+			final GridBagConstraints lc = new GridBagConstraints();
+			lc.gridx = 0;
+			lc.gridy = y;
+			lc.anchor = GridBagConstraints.LINE_END;
+			lc.insets = new Insets( 3, 4, 3, 6 );
+			panel.add( label, lc );
+			final GridBagConstraints fc = new GridBagConstraints();
+			fc.gridx = 1;
+			fc.gridy = y++;
+			fc.anchor = GridBagConstraints.LINE_START;
+			fc.fill = GridBagConstraints.HORIZONTAL;
+			fc.weightx = 1.0;
+			fc.insets = new Insets( 3, 0, 3, 4 );
+			panel.add( field, fc );
+		}
+
+		/** Pushes the rows to the top when the other tab is taller. */
+		void fill()
+		{
+			final GridBagConstraints c = new GridBagConstraints();
+			c.gridx = 0;
+			c.gridy = y++;
+			c.weighty = 1.0;
+			panel.add( new JPanel(), c );
+		}
 	}
 }

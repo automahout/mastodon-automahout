@@ -51,7 +51,7 @@ import bdv.viewer.ViewerPanel;
  * <p>Opens (or reuses) a BDV window, captures representative snapshots, sends
  * them to the configured VLM backend, and writes the resulting Markdown
  * description to the output file configured in
- * {@link VlmSettingsDialog VLM/LLM Settings}. Progress is shown in the
+ * {@link AutomahoutSettingsDialog Automahout Settings}. Progress is shown in the
  * Automahout log window.</p>
  */
 class AnalyzeVideoAction extends AbstractNamedAction

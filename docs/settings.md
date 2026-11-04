@@ -1,51 +1,46 @@
 # Automahout Settings Reference
 
-Open the settings dialog via **Plugins › Automahout › Automahout Settings…**
+Open the settings dialog via **Plugins › Automahout › Automahout Settings…**. It has two tabs; every field
+is read by the tracking pipeline, and changes are saved on **OK**.
 
 ---
 
-## Detection
+## VLM / LLM tab
 
-Parameters that control how ELEPHANT detects spots in each timepoint during Phase 1.
+| Parameter | Description |
+|---|---|
+| **Backend** | `ollama` (a local Ollama server), `anthropic` (the Anthropic API) or `bedrock` (Claude through Amazon Bedrock). |
+| **Model name / tag** | The model id, e.g. a Bedrock inference-profile id. |
+| **Ollama base URL** | Shown for `ollama` only (default `http://localhost:11434`). |
+| **Anthropic API key** | Shown for `anthropic` only; leave empty to use the `ANTHROPIC_API_KEY` environment variable. |
+| **AWS region** | Shown for `bedrock` only; credentials come from `AWS_BEARER_TOKEN_BEDROCK` or the AWS SDK's default chain. |
+| **Max snapshots** | Screenshots the pre-flight analysis sends to the model. |
+| **Z slices / timepoint** | Z slices captured per sampled timepoint (1 = the current slice). |
+| **Output file** | The Markdown file the pre-flight analysis (`video.analyze`) writes. |
+
+---
+
+## Tracking tab
+
+### Range
 
 | Parameter | Default | Description |
 |---|---|---|
-| **Max spots per timepoint** | 10 | Upper bound on the number of spots added to the graph per timepoint. Increase if the field of view contains many cells; reduce to limit over-detection. |
-| **Mipmap level (-1 = auto)** | -1 | Resolution level used for image scanning. `-1` selects the coarsest available level (fastest). `0` uses full resolution. Intermediate values select finer levels. Coarser levels are sufficient for detection and greatly reduce computation time. |
-| **Stride XY (voxels)** | 4 | Sampling stride in X and Y. Every N-th voxel is evaluated in each lateral plane. Smaller values increase recall at the cost of speed. |
-| **Stride Z (voxels)** | 1 | Sampling stride in Z. `1` evaluates every z-plane. Increase for data with high z-sampling density. |
-| **Suppression radius (px)** | 50 | Non-maximum suppression radius in screen pixels. Two candidate spots closer than this distance (in screen space) are merged into one. Increase if duplicate spots appear; decrease if adjacent cells are merged. |
+| **Start timepoint (-1 = first)** | -1 | First timepoint the tracking and correction process. |
+| **End timepoint (-1 = last)** | -1 | Last timepoint processed (inclusive). |
 
----
-
-## Spot
-
-| Parameter | Default | Description |
-|---|---|---|
-| **Spot radius (world units)** | 5.0 | Radius assigned to newly created spherical spots. The unit matches the physical calibration of the dataset (e.g. µm). This is also used as the reference scale for the long-link factor in correction. |
-
----
-
-## Navigation
-
-| Parameter | Default | Description |
-|---|---|---|
-| **Navigate animation (ms)** | 500 | Duration of the pan-to animation when the BDV viewer moves to a new spot position. Set to `0` for instant navigation. |
-
----
-
-## Correction
+### Correction
 
 Parameters that control the autonomous correction pass (Phase 3), which runs after detection and linking.  
 All correction strategies are applied per timepoint in the order listed below.
 
-### 1. Long-link pruning
+#### 1. Long-link pruning
 
 | Parameter | Default | Description |
 |---|---|---|
 | **Long-link factor** | 3.0 | A link is considered spurious when its Euclidean length exceeds `factor × max(r_source, r_target)`, where `r` is the bounding-sphere radius of each endpoint spot. The link is deleted and the orphaned spot is immediately re-linked by ELEPHANT nearest-neighbour linking. Increase to tolerate faster-moving cells; decrease to prune more aggressively. |
 
-### 2. Weak-spot deletion (intensity-based)
+#### 2. Weak-spot deletion (intensity-based)
 
 | Parameter | Default | Description |
 |---|---|---|
@@ -53,11 +48,11 @@ All correction strategies are applied per timepoint in the order listed below.
 
 > **Note:** Intensity sampling uses the source transform at mipmap level 0 (full resolution). Spots outside the image bounds return intensity `0` and will be deleted if the ratio is non-zero. Check that all spots lie within the image volume before enabling this setting.
 
-### 3. Isolated-spot deletion
+#### 3. Isolated-spot deletion
 
 Spots at non-terminal timepoints that have no incoming **and** no outgoing edges after pruning and re-linking are automatically deleted. This step has no configurable parameter.
 
-### 4. Anisotropic-spot refit (optional)
+#### 4. Anisotropic-spot refit (optional)
 
 | Parameter | Default | Description |
 |---|---|---|

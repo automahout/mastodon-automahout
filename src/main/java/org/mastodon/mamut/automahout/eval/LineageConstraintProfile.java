@@ -334,7 +334,7 @@ public final class LineageConstraintProfile
 					"IGNORING the active lineage-constraint profile: it was learned from %s, but this "
 							+ "project is '%s'. Its per-frame displacement cap would REPLACE the one "
 							+ "measured on this dataset, and its division rate can authorise cutting real "
-							+ "division links. Relearn it here with Plugins > Automahout > Learn Lineage "
+							+ "division links. Relearn it here with Plugins > Automahout > Advanced > Learn Lineage "
 							+ "Constraints, or clear the path in the settings. Proceeding without a "
 							+ "profile for this run.",
 					p.dataset == null || p.dataset.trim().isEmpty()

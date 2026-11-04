@@ -227,7 +227,7 @@ public class AnalyzeVideoTool implements AutomahoutTool
 				apiKey = System.getenv( "ANTHROPIC_API_KEY" );
 			if ( apiKey == null || apiKey.trim().isEmpty() )
 				return "Error: Anthropic API key not found. "
-						+ "Set it in 'Automahout VLM/LLM Settings...', "
+						+ "Set it in 'Automahout Settings...' (VLM / LLM tab), "
 						+ "pass '" + PARAM_API_KEY + "' as a parameter, "
 						+ "or set the ANTHROPIC_API_KEY environment variable.";
 			backend = new AnthropicBackend( apiKey );

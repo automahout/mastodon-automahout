@@ -8954,7 +8954,7 @@ public class ElephantTool implements AutomahoutTool
 						+ "confirmed cells). The cap on how many detections each window may teach still "
 						+ "applies if you stated a cell count — it then keeps the ones standing furthest "
 						+ "above the background instead of the ones closest to your confirmed cells. Tag "
-						+ "some cells Status > Completed and run Plugins > Automahout > Build GT "
+						+ "some cells Status > Completed and run Plugins > Automahout > Advanced > Build GT "
 						+ "Annotation Store to turn the rest on.",
 				confirmed, MIN_CONFIRMED_SPOTS_FOR_DEBRIS_FLOOR ) );
 	}
@@ -9003,7 +9003,7 @@ public class ElephantTool implements AutomahoutTool
 		context.log( String.format(
 				"  IGNORING the active GT annotation store: it was built from %s, but this project is "
 						+ "'%s'. Training on another dataset's annotations would teach this detector "
-						+ "another movie's cells. Rebuild it here with Plugins > Automahout > Build GT "
+						+ "another movie's cells. Rebuild it here with Plugins > Automahout > Advanced > Build GT "
 						+ "Annotation Store from Confirmed Spots..., or clear the path in the settings. "
 						+ "Proceeding without GT for this run.",
 				storeDataset == null || storeDataset.trim().isEmpty()
