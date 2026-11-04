@@ -33,31 +33,24 @@ import java.awt.event.ActionEvent;
 import org.scijava.ui.behaviour.util.AbstractNamedAction;
 
 /**
- * Stops the currently running {@link AutomahoutLoop}.
+ * Cancels a running autonomous tracking.
  *
  * <p>This action is registered under
  * {@link MastodonAutomahoutPlugin#ACTION_STOP_NAME} and appears in the menu
  * as <em>Plugins &gt; Automahout &gt; Stop Automahout</em>. It is safe to
- * invoke even when no loop is running.</p>
+ * invoke when nothing is running.</p>
  */
 public class AutomahoutStopAction extends AbstractNamedAction
 {
 
 	private static final long serialVersionUID = 1L;
 
-	private final AutomahoutLoop loop;
-
 	private AutonomousTrackingAction autonomousTrackingAction;
 
-	/**
-	 * Creates the stop action.
-	 *
-	 * @param loop the shared loop instance that will be stopped
-	 */
-	public AutomahoutStopAction( final AutomahoutLoop loop )
+	/** Creates the stop action. */
+	public AutomahoutStopAction()
 	{
 		super( MastodonAutomahoutPlugin.ACTION_STOP_NAME );
-		this.loop = loop;
 	}
 
 	/**
@@ -72,7 +65,6 @@ public class AutomahoutStopAction extends AbstractNamedAction
 	@Override
 	public void actionPerformed( final ActionEvent e )
 	{
-		loop.stop();
 		if ( autonomousTrackingAction != null )
 			autonomousTrackingAction.cancel();
 	}

@@ -188,7 +188,7 @@ public class FindMaximaTool implements AutomahoutTool
 
 		// NOTE: execute() is called on the EDT by ToolOrchestrator, so both
 		// phases run synchronously here. For large volumes this may be slow;
-		// use AutomahoutLoop (which offloads to SwingWorker) for interactive use.
+		// for interactive use, run the scan phase off the EDT (e.g. in a SwingWorker).
 		final ScanState state = captureViewerState( viewer, timepoint, mipmapLevel );
 		if ( !state.isValid() )
 			return "no image data at timepoint " + timepoint;
@@ -698,7 +698,7 @@ public class FindMaximaTool implements AutomahoutTool
 	 *
 	 * <p><b>Must be called on the EDT</b> and blocks during the scan.
 	 * For interactive use, prefer calling the two phases separately with a
-	 * {@code SwingWorker} (as done by {@code AutomahoutLoop}).</p>
+	 * {@code SwingWorker}.</p>
 	 */
 	public static List< double[] > findMaxima(
 			final ViewerPanel viewer,

@@ -58,16 +58,13 @@ import org.scijava.ui.behaviour.util.Actions;
 public class MastodonAutomahoutPlugin implements MamutPlugin
 {
 
-	static final String ACTION_NAME = "automahout run";
 
 	static final String ACTION_STOP_NAME = "automahout stop";
 
 	static final String ACTION_SETTINGS_NAME = "automahout settings";
 
-	static final String ACTION_CORRECT_NAME = "automahout correct";
 
 
-	static final String ACTION_ANALYZE_VIDEO_NAME = "automahout analyze video";
 
 	static final String ACTION_AUTONOMOUS_TRACKING_NAME = "automahout autonomous tracking";
 
@@ -77,9 +74,7 @@ public class MastodonAutomahoutPlugin implements MamutPlugin
 
 	static final String ACTION_BUILD_GT_STORE_NAME = "automahout build gt store";
 
-	static final String ACTION_FOCUS_WINDOW_NAME = "automahout focus window";
 
-	static final String ACTION_FILTER_BY_EXAMPLE_NAME = "automahout filter by example";
 
 	static final String ACTION_RUN_TOOL_NAME = "automahout run a tool";
 
@@ -104,16 +99,11 @@ public class MastodonAutomahoutPlugin implements MamutPlugin
 	private static final String[] SHORTCUTS_RUN_TOOL = new String[] { "not mapped" };
 
 	/**
-	 * Persistent settings shared by the loop and the settings dialog.
+	 * Persistent settings shared by the actions and the settings dialog.
 	 * Loaded from user preferences at construction time.
 	 */
 	private final AutomahoutSettings settings = new AutomahoutSettings();
 
-	/**
-	 * One loop instance per plugin (= per Mastodon project), shared by the run
-	 * and stop actions so that stop can interrupt what run started.
-	 */
-	private final AutomahoutLoop loop = new AutomahoutLoop( settings );
 
 
 	private AutomahoutStopAction stopAction;
@@ -138,10 +128,9 @@ public class MastodonAutomahoutPlugin implements MamutPlugin
 	@Override
 	public void setAppPluginModel( final ProjectModel projectModel )
 	{
-		final AutomahoutLogWindow logWindow = new AutomahoutLogWindow( loop );
-		loop.setProgressListener( logWindow );
+		final AutomahoutLogWindow logWindow = new AutomahoutLogWindow();
 
-		stopAction = new AutomahoutStopAction( loop );
+		stopAction = new AutomahoutStopAction();
 		settingsAction = new AutomahoutSettingsAction( settings );
 		autonomousTrackingAction = new AutonomousTrackingAction( projectModel, logWindow );
 		learnConstraintsAction = new LearnConstraintsAction( logWindow, settings );
@@ -152,7 +141,6 @@ public class MastodonAutomahoutPlugin implements MamutPlugin
 
 		// Combine stop sources: the button must halt whichever operation is active.
 		logWindow.setStopCallback( () -> {
-			loop.stop();
 			autonomousTrackingAction.cancel();
 		} );
 	}
@@ -210,7 +198,7 @@ public class MastodonAutomahoutPlugin implements MamutPlugin
 		public void getCommandDescriptions( final CommandDescriptions descriptions )
 		{
 			descriptions.add( ACTION_STOP_NAME, SHORTCUTS_STOP,
-					"Stop the currently running Automahout loop." );
+					"Stop the running autonomous tracking." );
 			descriptions.add( ACTION_SETTINGS_NAME, SHORTCUTS_SETTINGS,
 					"Open the Automahout settings: the VLM/LLM backend, model and connection, and the tracking range and correction parameters." );
 			descriptions.add( ACTION_AUTONOMOUS_TRACKING_NAME, SHORTCUTS_AUTONOMOUS_TRACKING,

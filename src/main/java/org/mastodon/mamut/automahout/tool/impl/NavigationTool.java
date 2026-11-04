@@ -167,8 +167,7 @@ public class NavigationTool implements AutomahoutTool
 	 * The zoom level and rotation are unchanged; only the 3D translation
 	 * component of the viewer transform is animated.
 	 *
-	 * <p>This is a public static utility so that {@code AutomahoutLoop} can
-	 * call it directly without going through the tool system.</p>
+	 * <p>A public static utility, so that code can call it directly without going through the tool system.</p>
 	 *
 	 * @param viewer   the target viewer panel (must be on the EDT)
 	 * @param worldX   world X coordinate to centre and focus

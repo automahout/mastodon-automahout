@@ -50,16 +50,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultCaret;
 
 /**
- * Non-modal log window that displays the real-time progress of the
- * {@link AutomahoutLoop}.
+ * Non-modal log window of Automahout's runs: the log (also written to a file in the temporary directory), a Stop
+ * button and a status panel.
  *
- * <p>Implements {@link AutomahoutProgressListener} so it can be registered
- * directly on the loop via {@link AutomahoutLoop#setProgressListener}.</p>
- *
- * <p>The window remains open after the loop finishes so the user can review
- * the log. It can be re-used across multiple runs.</p>
+ * <p>The window remains open after a run finishes so the user can review the log. It can be re-used across
+ * multiple runs.</p>
  */
-public class AutomahoutLogWindow implements AutomahoutProgressListener
+public class AutomahoutLogWindow
 {
 
 	// ---- colours ----------------------------------------------------------
@@ -89,12 +86,12 @@ public class AutomahoutLogWindow implements AutomahoutProgressListener
 
 	private final JButton stopButton;
 
-	/** Mutable stop callback — replaced to support both loop and autonomous tracking. */
+	/** What the Stop button does; set by the plugin with {@link #setStopCallback}. */
 	private volatile Runnable stopCallback;
 
 	// -----------------------------------------------------------------------
 
-	public AutomahoutLogWindow( final AutomahoutLoop loop )
+	public AutomahoutLogWindow()
 	{
 		frame = new JFrame( "Automahout" );
 		frame.setDefaultCloseOperation( JFrame.HIDE_ON_CLOSE );
@@ -157,7 +154,6 @@ public class AutomahoutLogWindow implements AutomahoutProgressListener
 				BorderFactory.createMatteBorder( 1, 0, 0, 0, Color.LIGHT_GRAY ),
 				BorderFactory.createEmptyBorder( 6, 10, 6, 10 ) ) );
 
-		stopCallback = loop::stop;
 		stopButton = new JButton( "Stop" );
 		stopButton.setEnabled( false );
 		stopButton.addActionListener( e -> {
@@ -192,8 +188,7 @@ public class AutomahoutLogWindow implements AutomahoutProgressListener
 
 	/**
 	 * Replaces the Stop button's action with {@code callback}.
-	 * Call this after creating both the loop and the autonomous tracking action
-	 * so that Stop halts whichever operation is currently running.
+	 * The plugin sets it to cancel a running autonomous tracking.
 	 */
 	public void setStopCallback( final Runnable callback )
 	{
@@ -213,9 +208,8 @@ public class AutomahoutLogWindow implements AutomahoutProgressListener
 	}
 
 	// -----------------------------------------------------------------------
-	// AutomahoutProgressListener
+	// Status and log
 
-	@Override
 	public void onStatusUpdate( final String phase, final int currentT, final int totalT,
 			final int progressPercent )
 	{
@@ -233,7 +227,6 @@ public class AutomahoutLogWindow implements AutomahoutProgressListener
 		} );
 	}
 
-	@Override
 	public void onLogMessage( final String message )
 	{
 		final String timestamp = LocalTime.now().format( TIME_FMT );
@@ -267,7 +260,6 @@ public class AutomahoutLogWindow implements AutomahoutProgressListener
 		}
 	}
 
-	@Override
 	public void onCompleted()
 	{
 		SwingUtilities.invokeLater( () -> {
@@ -281,7 +273,6 @@ public class AutomahoutLogWindow implements AutomahoutProgressListener
 		} );
 	}
 
-	@Override
 	public void onStopped()
 	{
 		SwingUtilities.invokeLater( () -> {

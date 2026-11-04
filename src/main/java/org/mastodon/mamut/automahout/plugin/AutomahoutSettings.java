@@ -46,20 +46,6 @@ public class AutomahoutSettings
 
 	// ---- preference keys --------------------------------------------------
 
-	private static final String KEY_MAX_SPOTS = "maxSpots";
-
-	private static final String KEY_MIPMAP_LEVEL = "mipmapLevel";
-
-	private static final String KEY_STRIDE_XY = "strideXY";
-
-	private static final String KEY_STRIDE_Z = "strideZ";
-
-	private static final String KEY_SUPPRESSION_PX = "suppressionPx";
-
-	private static final String KEY_SPOT_RADIUS = "spotRadius";
-
-	private static final String KEY_NAVIGATE_ANIM_MS = "navigateAnimMs";
-
 	private static final String KEY_CORRECT_LONG_LINK_FACTOR = "correctLongLinkFactor";
 
 	/**
@@ -80,8 +66,6 @@ public class AutomahoutSettings
 	private static final String KEY_START_TIMEPOINT = "startTimepoint";
 
 	private static final String KEY_END_TIMEPOINT = "endTimepoint";
-
-	private static final String KEY_OPEN_TRACK_SCHEME = "openTrackScheme";
 
 	private static final String KEY_CORRECT_MERGE_OVERLAP_RATIO = "correctMergeOverlapRatio";
 
@@ -147,30 +131,6 @@ public class AutomahoutSettings
 
 	// ---- defaults ---------------------------------------------------------
 
-	/** Default maximum spots per timepoint. */
-	static final int DEFAULT_MAX_SPOTS = 10;
-
-	/**
-	 * Default mipmap level: {@code -1} = auto-select coarsest (fastest).
-	 * {@code 0} = full resolution.
-	 */
-	static final int DEFAULT_MIPMAP_LEVEL = -1;
-
-	/** Default voxel sampling stride in X and Y. */
-	static final int DEFAULT_STRIDE_XY = 4;
-
-	/** Default voxel sampling stride in Z. */
-	static final int DEFAULT_STRIDE_Z = 1;
-
-	/** Default non-maximum suppression radius in screen pixels. */
-	static final double DEFAULT_SUPPRESSION_PX = 50.0;
-
-	/** Default spot radius in world units. */
-	static final double DEFAULT_SPOT_RADIUS = 5.0;
-
-	/** Default navigate-to animation duration in milliseconds. */
-	static final long DEFAULT_NAVIGATE_ANIM_MS = 500L;
-
 	/**
 	 * Default long-link factor: prune links whose distance exceeds
 	 * this multiple of {@code max(r_source, r_target)}.
@@ -220,9 +180,6 @@ public class AutomahoutSettings
 	 * Default end timepoint: {@code -1} = use the last timepoint in the dataset.
 	 */
 	static final int DEFAULT_END_TIMEPOINT = -1;
-
-	/** Default: do not open a TrackScheme window alongside the BDV window. */
-	static final boolean DEFAULT_OPEN_TRACK_SCHEME = false;
 
 	/**
 	 * Default merge overlap ratio: {@code 0.0} = disabled.
@@ -288,20 +245,6 @@ public class AutomahoutSettings
 
 	// ---- fields -----------------------------------------------------------
 
-	private int maxSpots;
-
-	private int mipmapLevel;
-
-	private int strideXY;
-
-	private int strideZ;
-
-	private double suppressionRadiusPx;
-
-	private double spotRadius;
-
-	private long navigateAnimMs;
-
 	private double correctLongLinkFactor;
 
 	/**
@@ -324,8 +267,6 @@ public class AutomahoutSettings
 	private int startTimepoint;
 
 	private int endTimepoint;
-
-	private boolean openTrackScheme;
 
 	private double correctMergeOverlapRatio;
 
@@ -375,13 +316,6 @@ public class AutomahoutSettings
 	/** Loads all values from persistent storage. */
 	public void load()
 	{
-		maxSpots = PREFS.getInt( KEY_MAX_SPOTS, DEFAULT_MAX_SPOTS );
-		mipmapLevel = PREFS.getInt( KEY_MIPMAP_LEVEL, DEFAULT_MIPMAP_LEVEL );
-		strideXY = PREFS.getInt( KEY_STRIDE_XY, DEFAULT_STRIDE_XY );
-		strideZ = PREFS.getInt( KEY_STRIDE_Z, DEFAULT_STRIDE_Z );
-		suppressionRadiusPx = PREFS.getDouble( KEY_SUPPRESSION_PX, DEFAULT_SUPPRESSION_PX );
-		spotRadius = PREFS.getDouble( KEY_SPOT_RADIUS, DEFAULT_SPOT_RADIUS );
-		navigateAnimMs = PREFS.getLong( KEY_NAVIGATE_ANIM_MS, DEFAULT_NAVIGATE_ANIM_MS );
 		correctLongLinkFactor = PREFS.getDouble( KEY_CORRECT_LONG_LINK_FACTOR, DEFAULT_CORRECT_LONG_LINK_FACTOR );
 		correctRefitAnisotropic = PREFS.getBoolean( KEY_CORRECT_REFIT_ANISOTROPIC, DEFAULT_CORRECT_REFIT_ANISOTROPIC );
 		correctAnisotropyThreshold = PREFS.getDouble( KEY_CORRECT_ANISOTROPY_THRESHOLD, DEFAULT_CORRECT_ANISOTROPY_THRESHOLD );
@@ -390,7 +324,6 @@ public class AutomahoutSettings
 		correctMinSizeRatio = PREFS.getDouble( KEY_CORRECT_MIN_SIZE_RATIO, DEFAULT_CORRECT_MIN_SIZE_RATIO );
 		startTimepoint = PREFS.getInt( KEY_START_TIMEPOINT, DEFAULT_START_TIMEPOINT );
 		endTimepoint = PREFS.getInt( KEY_END_TIMEPOINT, DEFAULT_END_TIMEPOINT );
-		openTrackScheme = PREFS.getBoolean( KEY_OPEN_TRACK_SCHEME, DEFAULT_OPEN_TRACK_SCHEME );
 		correctMergeOverlapRatio = PREFS.getDouble( KEY_CORRECT_MERGE_OVERLAP_RATIO, DEFAULT_CORRECT_MERGE_OVERLAP_RATIO );
 		correctFillGaps = PREFS.getBoolean( KEY_CORRECT_FILL_GAPS, DEFAULT_CORRECT_FILL_GAPS );
 		correctGapCropFactor = PREFS.getDouble( KEY_CORRECT_GAP_CROP_FACTOR, DEFAULT_CORRECT_GAP_CROP_FACTOR );
@@ -413,13 +346,6 @@ public class AutomahoutSettings
 	/** Persists all current values to storage. */
 	public void save()
 	{
-		PREFS.putInt( KEY_MAX_SPOTS, maxSpots );
-		PREFS.putInt( KEY_MIPMAP_LEVEL, mipmapLevel );
-		PREFS.putInt( KEY_STRIDE_XY, strideXY );
-		PREFS.putInt( KEY_STRIDE_Z, strideZ );
-		PREFS.putDouble( KEY_SUPPRESSION_PX, suppressionRadiusPx );
-		PREFS.putDouble( KEY_SPOT_RADIUS, spotRadius );
-		PREFS.putLong( KEY_NAVIGATE_ANIM_MS, navigateAnimMs );
 		PREFS.putDouble( KEY_CORRECT_LONG_LINK_FACTOR, correctLongLinkFactor );
 		PREFS.putBoolean( KEY_CORRECT_REFIT_ANISOTROPIC, correctRefitAnisotropic );
 		PREFS.putDouble( KEY_CORRECT_ANISOTROPY_THRESHOLD, correctAnisotropyThreshold );
@@ -428,7 +354,6 @@ public class AutomahoutSettings
 		PREFS.putDouble( KEY_CORRECT_MIN_SIZE_RATIO, correctMinSizeRatio );
 		PREFS.putInt( KEY_START_TIMEPOINT, startTimepoint );
 		PREFS.putInt( KEY_END_TIMEPOINT, endTimepoint );
-		PREFS.putBoolean( KEY_OPEN_TRACK_SCHEME, openTrackScheme );
 		PREFS.putDouble( KEY_CORRECT_MERGE_OVERLAP_RATIO, correctMergeOverlapRatio );
 		PREFS.putBoolean( KEY_CORRECT_FILL_GAPS, correctFillGaps );
 		PREFS.putDouble( KEY_CORRECT_GAP_CROP_FACTOR, correctGapCropFactor );
@@ -448,89 +373,7 @@ public class AutomahoutSettings
 		PREFS.putInt( KEY_VLM_Z_SLICES, vlmZSlicesPerTimepoint );
 	}
 
-	// ---- getters ----------------------------------------------------------
-
-	/** Maximum number of spots added per timepoint. */
-	public int getMaxSpots()
-	{
-		return maxSpots;
-	}
-
-	/**
-	 * Mipmap level used for scanning ({@code -1} = auto/coarsest,
-	 * {@code 0} = full resolution).
-	 */
-	public int getMipmapLevel()
-	{
-		return mipmapLevel;
-	}
-
-	/** Voxel sampling stride in X and Y. */
-	public int getStrideXY()
-	{
-		return strideXY;
-	}
-
-	/** Voxel sampling stride in Z. */
-	public int getStrideZ()
-	{
-		return strideZ;
-	}
-
-	/** Non-maximum suppression radius in screen pixels. */
-	public double getSuppressionRadiusPx()
-	{
-		return suppressionRadiusPx;
-	}
-
-	/** Radius of newly created spots in world units. */
-	public double getSpotRadius()
-	{
-		return spotRadius;
-	}
-
-	/** Duration of the navigate-to pan animation in milliseconds. */
-	public long getNavigateAnimMs()
-	{
-		return navigateAnimMs;
-	}
-
-	// ---- setters ----------------------------------------------------------
-
-	public void setMaxSpots( final int maxSpots )
-	{
-		this.maxSpots = maxSpots;
-	}
-
-	public void setMipmapLevel( final int mipmapLevel )
-	{
-		this.mipmapLevel = mipmapLevel;
-	}
-
-	public void setStrideXY( final int strideXY )
-	{
-		this.strideXY = strideXY;
-	}
-
-	public void setStrideZ( final int strideZ )
-	{
-		this.strideZ = strideZ;
-	}
-
-	public void setSuppressionRadiusPx( final double suppressionRadiusPx )
-	{
-		this.suppressionRadiusPx = suppressionRadiusPx;
-	}
-
-	public void setSpotRadius( final double spotRadius )
-	{
-		this.spotRadius = spotRadius;
-	}
-
-	public void setNavigateAnimMs( final long navigateAnimMs )
-	{
-		this.navigateAnimMs = navigateAnimMs;
-	}
+	// ---- getters and setters ----------------------------------------------
 
 	/**
 	 * Factor for long-link detection: a link is pruned when its Euclidean
@@ -656,17 +499,6 @@ public class AutomahoutSettings
 	public void setEndTimepoint( final int endTimepoint )
 	{
 		this.endTimepoint = endTimepoint;
-	}
-
-	/** Whether to open a TrackScheme window alongside the BDV window when the loop starts. */
-	public boolean isOpenTrackScheme()
-	{
-		return openTrackScheme;
-	}
-
-	public void setOpenTrackScheme( final boolean openTrackScheme )
-	{
-		this.openTrackScheme = openTrackScheme;
 	}
 
 	/**
