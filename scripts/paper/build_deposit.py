@@ -119,7 +119,7 @@ def readme(out, scores, model_sha):
                                                     for k in SCORES) + " |" for d, kind, s in scores)
     text = f"""# Automahout, preprint v1: data deposit
 
-SSBD:repository, `[ssbd-repos-XXXXXX]`, https://doi.org/`[DOI]`. Companion to the preprint "Automahout: an autonomous image analysis system for cell
+SSBD:repository, `ssbd-repos-000552`, https://doi.org/10.24631/ssbd.repos.2026.11.552. Companion to the preprint "Automahout: an autonomous image analysis system for cell
 tracking" and to the code at https://github.com/automahout/mastodon-automahout, tag `preprint-v1`.
 
 ## Contents

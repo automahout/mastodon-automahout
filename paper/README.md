@@ -13,7 +13,7 @@ The input data are the Cell Tracking Challenge's training datasets Fluo-N2DL-HeL
 Fluo-N3DH-CE, downloaded from https://celltrackingchallenge.net/2d-datasets/ and
 https://celltrackingchallenge.net/3d-datasets/; they are not redistributed here.
 The commands of the runs are in Supplementary Note 1. Run outputs too large for the repository (RES, the
-Mastodon projects, the embryo's final model) are in the archived deposit.
+Mastodon projects, the embryo's final model) are in the archived deposit: SSBD:repository `ssbd-repos-000552`, https://doi.org/10.24631/ssbd.repos.2026.11.552.
 
 The manuscript as a Word document (figures above their legends; `--layout review` adds line numbers) and a PDF,
 from `scripts/paper`:
