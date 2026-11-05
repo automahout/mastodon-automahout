@@ -74,13 +74,16 @@ def zip_dir(src, dst, arcroot):
 
 
 def repoint_project(src, dst, xml_name):
-    """The project with its dataset path set to xml_name beside it; every other entry as it was."""
+    """The project with its dataset path set to xml_name beside it; every other entry as it was.
+
+    Mastodon resolves a relative path against the .mastodon file itself, as if it were a folder, so the XML
+    beside the project is ../xml_name."""
     with zipfile.ZipFile(src) as zin, zipfile.ZipFile(dst, "w", zipfile.ZIP_DEFLATED) as zout:
         for item in zin.infolist():
             data = zin.read(item.filename)
             if item.filename == "project.xml":
                 text, n = re.subn(r"<SpimDataFile[^>]*>[^<]*</SpimDataFile>",
-                                  f'<SpimDataFile type="relative">{xml_name}</SpimDataFile>', data.decode("utf-8"))
+                                  f'<SpimDataFile type="relative">../{xml_name}</SpimDataFile>', data.decode("utf-8"))
                 assert n == 1, f"{src}: no SpimDataFile"
                 data = text.encode("utf-8")
             zout.writestr(item, data)
