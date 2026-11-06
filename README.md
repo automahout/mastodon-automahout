@@ -1,5 +1,7 @@
 # Automahout
 
+<p align="center"><img src="docs/images/automahout.svg" alt="Automahout" width="240"></p>
+
 Automahout is an autonomous image analysis system for cell tracking: a plugin for
 [Mastodon](https://github.com/mastodon-sc/mastodon) in [Fiji](https://fiji.sc) that carries out the work a person
 does with Mastodon and [ELEPHANT](https://elephant-track.github.io): it looks at the data, tries pretrained
@@ -7,7 +9,8 @@ detectors, annotates cells, trains a detection model of its own, tracks, and che
 asking the person only when it cannot decide. Every annotation, detection and link it makes appears in
 Mastodon's own views, where it can be inspected and edited.
 
-The preprint, "Automahout: an autonomous image analysis system for cell tracking", describes the version at tag
+The preprint, ["Automahout: an autonomous image analysis system for cell tracking"](https://doi.org/10.64898/2026.11.04.764293)
+(bioRxiv), describes the version at tag
 [`preprint-v1`](https://github.com/automahout/mastodon-automahout/tree/preprint-v1); `main` continues from it.
 
 ## What it needs
@@ -57,6 +60,27 @@ system's temporary folder.
 | [docs/writing-a-tool.md](docs/writing-a-tool.md) | writing a tool in Java |
 | [paper/README.md](paper/README.md) | the preprint's figures, tables and runs |
 | [scripts/reproduce/README.md](scripts/reproduce/README.md) | rebuilding the benchmark from public data |
+
+## Citation
+
+If you use Automahout, please cite:
+
+> Automahout: an autonomous image analysis system for cell tracking\
+> Ko Sugawara, Shuichi Onami\
+> bioRxiv 2026.11.04.764293; doi: https://doi.org/10.64898/2026.11.04.764293
+
+```bibtex
+@article{Sugawara2026.11.04.764293,
+  author = {Sugawara, Ko and Onami, Shuichi},
+  title = {Automahout: an autonomous image analysis system for cell tracking},
+  journal = {bioRxiv},
+  year = {2026},
+  elocation-id = {2026.11.04.764293},
+  doi = {10.64898/2026.11.04.764293},
+  publisher = {Cold Spring Harbor Laboratory},
+  url = {https://www.biorxiv.org/content/early/2026/11/06/2026.11.04.764293}
+}
+```
 
 ## Licence
 
