@@ -44,6 +44,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.mastodon.mamut.automahout.tool.Applicability;
 import org.mastodon.mamut.automahout.tool.AutomahoutTool;
 import org.mastodon.mamut.automahout.tool.DataProfile;
 import org.mastodon.mamut.automahout.tool.ToolContext;
@@ -158,6 +159,9 @@ public final class DetectorTrial
 			ctx.log( "  Detector chosen earlier this run: " + ( d == null ? "ELEPHANT adaptive tracking" : d.getId() ) + "." );
 			return d;
 		}
+		final String named = System.getProperty( PROPERTY_DETECTOR, "" ).trim();
+		if ( !named.isEmpty() )
+			return named( ctx, registry, data, frames, named );
 		final List< FrameDetector > candidates = candidates( registry, data );
 		if ( candidates.isEmpty() )
 			return decided( ctx, null, "no pretrained detector is available that suits this data (" + data
@@ -658,6 +662,59 @@ public final class DetectorTrial
 	{
 		final AutomahoutTool t = registry.get( id ).orElse( null );
 		return t instanceof FrameDetector ? ( FrameDetector ) t : null;
+	}
+
+	/**
+	 * System property: the detector this run uses, named by the person running it -- a tool id such as
+	 * {@code cellpose.cpsam}, or {@code elephant} -- in place of the trial. The automatic choice judges a 2D
+	 * fluorescence movie by its bright regions, a measure calibrated on one sparse culture (HeLa); on dense tissue,
+	 * where touching cells read as one region and dim cells as none, it can refuse a detector a person would take.
+	 */
+	public static final String PROPERTY_DETECTOR = "automahout.detector";
+
+	/**
+	 * The detector named by {@link #PROPERTY_DETECTOR}. It detects the trial frames as an accepted one does, so its
+	 * counts replace the agent's guess at the cell count as when a person accepts it in the dialog. A name no tool
+	 * server offers stops the run: going on with another detector would not be the run that was asked for.
+	 */
+	static FrameDetector named( final ToolContext ctx, final ToolRegistry registry, final DataProfile data,
+			final int[] frames, final String id )
+	{
+		final String why = "named for this run (" + PROPERTY_DETECTOR + "=" + id + ")";
+		if ( ELEPHANT.equals( id ) )
+			return decided( ctx, null, why );
+		final FrameDetector d = find( registry, id );
+		if ( d == null )
+			throw new IllegalStateException( "the detector " + id + " named for this run (" + PROPERTY_DETECTOR
+					+ ") is not offered by any tool server: is its server running and listed in the remote tool servers?" );
+		final Applicability a = d.applicability( data );
+		if ( !a.applies )
+			ctx.log( "  Detector: " + id + " would not be tried on this data (" + a.reason + "); used because it was named." );
+		final Frame.Reader reader = RemoteTool.readers.apply( ctx );
+		final List< Integer > tps = new ArrayList<>();
+		final List< Integer > counts = new ArrayList<>();
+		for ( final int t : frames )
+		{
+			final Frame f = reader.read( t );
+			if ( f == null )
+				continue;
+			try
+			{
+				counts.add( d.detect( f, FrameDetector.hints( ctx ) ).size() );
+				tps.add( t );
+			}
+			catch ( final IOException e )
+			{
+				throw new IllegalStateException( id + " failed on t=" + t + ": " + e.getMessage(), e );
+			}
+		}
+		if ( !tps.isEmpty() )
+		{
+			ctx.setSharedData( SHARED_ACCEPTED_COUNTS, new int[][] { tps.stream().mapToInt( Integer::intValue ).toArray(),
+					counts.stream().mapToInt( Integer::intValue ).toArray() } );
+			ctx.log( "  Detector: " + id + " found " + counts + " detection(s) at t=" + tps + "." );
+		}
+		return decided( ctx, d, why );
 	}
 
 	/**

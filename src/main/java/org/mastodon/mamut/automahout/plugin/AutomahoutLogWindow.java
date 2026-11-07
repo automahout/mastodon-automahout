@@ -135,6 +135,12 @@ public class AutomahoutLogWindow
 	 * Replaces the Stop button's action with {@code callback}.
 	 * The plugin sets it to cancel a running autonomous tracking.
 	 */
+	/** Places the window (a demo lays it out beside the image; see BenchmarkRunner). */
+	public void setBounds( final java.awt.Rectangle bounds )
+	{
+		frame.setBounds( bounds );
+	}
+
 	public void setStopCallback( final Runnable callback )
 	{
 		stopCallback = callback;

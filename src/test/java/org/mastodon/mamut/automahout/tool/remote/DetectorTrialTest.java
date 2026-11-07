@@ -129,6 +129,57 @@ public class DetectorTrialTest
 	}
 
 	@Test
+	public void aNamedDetectorIsUsedWithoutTheTrialAndItsCountsAreKept()
+	{
+		System.setProperty( DetectorTrial.PROPERTY_DETECTOR, "stardist.he" ); // would not be tried on fluorescence
+		try
+		{
+			final ToolContext ctx = answering();
+			final FrameDetector d = DetectorTrial.choose( ctx, registry, FLUORESCENCE_2D, new int[] { 0, 45, 91 } );
+			assertEquals( "stardist.he", d.getId() );
+			assertEquals( "[]", asked.toString() ); // nothing shown
+			assertEquals( "stardist.he", ctx.getSharedData( DetectorTrial.SHARED_CHOICE ) );
+			final int[][] counts = ( int[][] ) ctx.getSharedData( DetectorTrial.SHARED_ACCEPTED_COUNTS );
+			assertEquals( "[0, 45, 91]", java.util.Arrays.toString( counts[ 0 ] ) );
+			assertEquals( "[1, 1, 1]", java.util.Arrays.toString( counts[ 1 ] ) );
+		}
+		finally
+		{
+			System.clearProperty( DetectorTrial.PROPERTY_DETECTOR );
+		}
+	}
+
+	@Test
+	public void namingElephantSkipsThePretrainedDetectors()
+	{
+		System.setProperty( DetectorTrial.PROPERTY_DETECTOR, "elephant" );
+		try
+		{
+			final ToolContext ctx = answering();
+			assertEquals( null, DetectorTrial.choose( ctx, registry, FLUORESCENCE_2D, new int[] { 0 } ) );
+			assertEquals( DetectorTrial.ELEPHANT, ctx.getSharedData( DetectorTrial.SHARED_CHOICE ) );
+		}
+		finally
+		{
+			System.clearProperty( DetectorTrial.PROPERTY_DETECTOR );
+		}
+	}
+
+	@Test( expected = IllegalStateException.class )
+	public void aNameNoServerOffersIsRefused()
+	{
+		System.setProperty( DetectorTrial.PROPERTY_DETECTOR, "cellpose.cpsam" );
+		try
+		{
+			DetectorTrial.choose( answering(), registry, FLUORESCENCE_2D, new int[] { 0 } );
+		}
+		finally
+		{
+			System.clearProperty( DetectorTrial.PROPERTY_DETECTOR );
+		}
+	}
+
+	@Test
 	public void theFirstAcceptedDetectorIsUsed()
 	{
 		final ToolContext ctx = answering( 1, 0 ); // StarDist: not good enough; Cellpose: use it

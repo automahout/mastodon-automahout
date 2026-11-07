@@ -163,6 +163,14 @@ public final class BenchmarkRunner
 					window[ 0 ] = new org.mastodon.mamut.automahout.plugin.AutomahoutLogWindow();
 					window[ 0 ].setStopCallback( ctx::requestCancel );
 					window[ 0 ].show();
+					// Side by side, the image left and the log right: on a virtual display without a window
+					// manager every window opens at the corner, on top of the others, and a recording shows one.
+					final java.awt.Rectangle screen =
+							java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+					final int left = ( int ) ( screen.width * 0.68 );
+					view[ 0 ].getFrame().setBounds( screen.x, screen.y, left, screen.height );
+					window[ 0 ].setBounds( new java.awt.Rectangle( screen.x + left, screen.y, screen.width - left,
+							screen.height ) );
 				} );
 				window[ 0 ].enableStop();
 			}
