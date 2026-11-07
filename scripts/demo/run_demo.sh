@@ -39,6 +39,10 @@ ELEPHANT_URL=${ELEPHANT_URL:-http://localhost:8080/}
 JAVA=${JAVA:-java}
 OUT=$DEMO_OUT/$NAME
 [ -f "$XML" ] || { echo "no $XML" >&2; exit 1; }
+# Readable by this process: macOS guards cloud-storage folders (Box, Dropbox, iCloud under ~/Library/CloudStorage)
+# per app, and a refusal surfaced only later, inside Java, as "FileNotFoundException ... (Operation not permitted)".
+head -c 1 "$XML" > /dev/null 2>&1 || { echo "cannot read $XML (macOS may be blocking access to a cloud-storage" \
+  "folder): copy the .xml and .h5 to a local folder, or allow the terminal access to it" >&2; exit 1; }
 [ -f "${XML%.xml}.h5" ] || echo "note: no ${XML%.xml}.h5 beside the XML; the XML must name where its data is" >&2
 curl -fs -m 5 "${ELEPHANT_URL}state/process" > /dev/null || { echo "ELEPHANT server not reachable at $ELEPHANT_URL" >&2; exit 1; }
 # Whether the server holds the dataset: an empty shape never matches, so a dataset that exists answers "Invalid
@@ -80,7 +84,17 @@ SHORT=()
 # The recording, and a virtual display when there is none: started here, stopped (and the video closed) on exit.
 XVFB_PID=; FFMPEG_PID=
 stop_recording() {
-  if [ -n "$FFMPEG_PID" ]; then kill -INT "$FFMPEG_PID" 2> /dev/null || true; wait "$FFMPEG_PID" 2> /dev/null || true
+  if [ -n "$FFMPEG_PID" ]; then
+    # SIGINT lets ffmpeg close the file; a capture that has stalled (the screen asleep, say) may not answer it, and
+    # a bare wait then kept the script running after the run had ended. 10 s, then TERM, then KILL.
+    kill -INT "$FFMPEG_PID" 2> /dev/null || true
+    for _ in 1 2 3 4 5 6 7 8 9 10; do kill -0 "$FFMPEG_PID" 2> /dev/null || break; sleep 1; done
+    if kill -0 "$FFMPEG_PID" 2> /dev/null; then
+      kill -TERM "$FFMPEG_PID" 2> /dev/null || true; sleep 3
+      kill -KILL "$FFMPEG_PID" 2> /dev/null || true
+      echo "ffmpeg did not stop on its own: $RECORD may be incomplete" >&2
+    fi
+    wait "$FFMPEG_PID" 2> /dev/null || true
     echo "video: $RECORD"; fi
   [ -z "$XVFB_PID" ] || kill "$XVFB_PID" 2> /dev/null || true
 }
