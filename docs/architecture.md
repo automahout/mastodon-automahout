@@ -1,4 +1,4 @@
-# mastodon-automahout — Architecture & Evaluation Metrics
+# Architecture
 
 `mastodon-automahout` drives **autonomous cell tracking** by wrapping
 [Mastodon](https://github.com/mastodon-sc/mastodon) and the
@@ -195,71 +195,64 @@ have two predecessors, just as it may not have three daughters.
 
 ---
 
-### 1.6 Tools are plugins, chosen by the data (in progress, 2026-10)
+### 1.6 Tools are plugins
 
-Automahout picks the tools that suit the imaging data and its spatiotemporal context, and tools can be
-added from outside. Decided with the user on 2026-10-12:
+Automahout chooses its tools to suit the data, and tools can be added from outside.
 
-- **Discovery: SciJava, plus a remote adapter.** A Java tool is an `AutomahoutTool` annotated
-  `@Plugin( type = AutomahoutTool.class )`; `ToolRegistry.forContext` finds built-in and external
-  tools alike. Python tools (Cellpose, StarDist, Trackastra, ...) will be server tools over HTTP/JSON,
-  as ELEPHANT is. How to write one: `docs/writing-a-tool.md`.
-- **Granularity: stages first, passes later.** Tools first stand for whole stages (detect, shape,
-  link, correct detections, correct lineage, train, assess -- `ToolRole`); the ~60 passes now inside
-  `AutoCorrectOrchestrator` and `ElephantTool` move out gradually, the ones already gated by data
-  properties first.
-- **Selection: rules filter, the LLM chooses.** Each tool declares `applicability( DataProfile )`;
-  the planner offers the LLM, per stage, only the tools that apply, with their typed parameters
-  (`ToolParameter`). Without an LLM the highest-scoring applicable tool runs.
+**Discovery.** A Java tool is an `AutomahoutTool` annotated `@Plugin( type = AutomahoutTool.class )`;
+`ToolRegistry.forContext` finds built-in and external tools alike, and a plugin with a higher priority replaces
+the built-in tool of the same id ([Writing an Automahout tool](writing-a-tool.md)). Tools in other languages are
+servers reached over HTTP/JSON, as ELEPHANT is ([Remote tools](remote-tools.md));
+`examples/remote-tools` offers Cellpose and StarDist this way.
 
-The contract every tool states: id, description, role, typed parameters, applicability (with a
-reason), `execute`. `DataProfile` gathers what the run already measured (dimensionality, timepoints,
-modality and SNR from `ImageProfile`, the stated cell count); fields not measured yet are null/NaN.
+**The contract.** Every tool states its id, description, role (`ToolRole`: detect, shape, link, correct
+detections, correct lineage, train, assess), typed parameters (`ToolParameter`), whether it applies to the data
+(`applicability( DataProfile )`, with a reason) and `execute`. `DataProfile` holds what the run has measured:
+dimensionality, timepoints, modality and signal-to-noise ratio (from `ImageProfile`), the stated cell count and
+the chosen detector; fields not measured yet are null or NaN.
 
-Steps, each keeping the current behaviour (checked against the origin dump):
+**The window plan.** Each window runs a plan of stages, logged as "Window plan:" at the start of a run:
+`elephant.detect` (DETECT) -> `nn.link` (LINK) -> `autocorrect.window` (CORRECT_DETECTIONS) ->
+`elephant.refine` (TRAIN) -> `topology.consistency` (CORRECT_LINEAGE). When a pretrained detector was chosen,
+`pretrained.detect` takes the first stage and the training stage is left out: there is no model to retrain.
 
-1. Contract and discovery; the 16 built-in tools registered through it. **Done.**
-2. The window loop's stages ([1/6]..[5c/6]) as stage tools; the current order becomes the default plan.
-   **Done as stage methods run from a plan** (`ElephantTool.WINDOW_PLAN`, logged as "Window plan:" at the
-   start of a run): elephant.detect (DETECT) -> elephant.link (LINK) -> autocorrect.window
-   (CORRECT_DETECTIONS) -> elephant.refine (TRAIN) -> topology.consistency (CORRECT_LINEAGE). Moved by
-   tool -- `scripts/refactor/` hoists the 134 shared variables into a `WindowRun` by javac's own name
-   resolution, then cuts the blocks; re-inlining them reproduces the old loop line for line. Letting a
-   tool from the registry fill a stage needs a public stage interface over `WindowRun`; that comes with
-   the planner (step 4).
-3. Passes moved out of the two large classes into tools, starting with the data-gated ones.
-   **The two correction steps are plans of passes** (`CorrectionPass`, `PassPlan`): the per-frame step
-   (`correctTimepoint`, 19 passes, `FramePasses`) and the lineage step (`runTopologyConsistency`, 13,
-   `LineagePasses`), in the order they always ran -- checked against the old method bodies on 300 random
-   graphs each (same graph, same counts, same report). Data gates moved from inside the passes into
-   `applicability( DataProfile )`: the three passes that re-detect with ELEPHANT's model (`elephant.*`)
-   are ruled out when a pretrained detector detects (`DataProfile.pretrainedDetector`), the merge repair
-   when the movie is 3D or not fluorescence. A pass from another jar joins after a named pass or replaces
-   one (docs/writing-a-tool.md, "Correction passes").
-   **The cleanup on each frame ELEPHANT detects is a third plan** (`DETECTED`, 10 passes, `DetectedPasses`):
-   extent -> split -> duplicates -> flat contrast -> no signal -> debris -> protected overlap -> weak ->
-   min size -> contour fit (last), as `predictWindow` ran them; the no-signal deletion declares itself
-   fluorescence-only. ELEPHANT's output only, by the user's choice (2026-10-12): StarDist/Cellpose output
-   goes through none of it, as before; which of these passes suit a pretrained detector is decided later,
-   pass by pass. Not checkable offline (it needs the ELEPHANT server), so compared by review and a GUI
-   run. The window-wide cleanup after each whole-window predict (duplicates, NMS, malformed shapes),
-   repeated four times in `detectStage`, is one method now (`cleanUpDetectedWindow`).
-   **Detection is chosen by trial (the user's procedure, 2026-10-12):** before the windows, the pretrained
-   detectors that suit the data are tried -- StarDist first, then Cellpose -- each on the first, middle
-   and last frame and shown to the user (`DetectorTrial`). The first one accepted detects every window as
-   it is (`pretrained.detect` -> nn.link -> autocorrect.window -> topology.consistency; ELEPHANT's
-   refinement is left out, there is no model to retrain). None accepted, no remote server, or nobody to
-   ask: ELEPHANT's adaptive tracking, unchanged. The choice holds for the run.
-   **Without the dialog** (pre-flight checkbox unticked, or nobody to ask) the image chooses
-   (`DetectorTrial.chooseFromImage`): each candidate is scored against the frames' bright regions (median +
-   5 MAD of the smoothed frame) -- recall proxy = regions with a detection, precision proxy = detections on
-   a region -- and the best mean F1 is taken if >= 0.90, else ELEPHANT. On HeLa 01 t=0/45/91 the proxy
-   ranks the detectors as the truth does (StarDist 0.96 vs true F1 0.92, Cellpose 0.86 vs 0.81, the H&E
-   model 0); the bar is calibrated on that one movie. Blind spots: a cell split in two still lands on a
-   bright region, and touching cells read as one region.
-4. The planner (rules + LLM per stage), the remote adapter, and one external example end to end.
-   **Remote adapter and example done** (docs/remote-tools.md, examples/remote-tools/, Run a Tool... dialog);
-   the planner is not.
+**Correction passes.** The corrections are three plans of passes (`CorrectionPass`, `PassPlan`):
+
+| Plan | Runs on | Passes |
+|---|---|---|
+| `DETECTED` (`DetectedPasses`) | each frame ELEPHANT detects, before linking | 12 |
+| `FRAME` (`FramePasses`) | each frame, after linking | 20 |
+| `LINEAGE` (`LineagePasses`) | the window's tracks | 13 |
+
+A pass states when it applies, in `applicability( DataProfile )`: the passes that re-detect with ELEPHANT's model
+(`elephant.*`) are ruled out when a pretrained detector detects; the merge repair and the no-signal deletion
+are ruled out on data that does not read as fluorescence. A pretrained detector's output goes through none of
+the `DETECTED` passes. A pass from another jar joins after a named pass or replaces one ([Writing an
+Automahout tool](writing-a-tool.md), "Correction passes").
+
+**Choosing the detector.** Before the first window, the pretrained detectors that apply to the data (StarDist
+first, then Cellpose) are tried on the first, middle and last frame (`DetectorTrial`). With the pre-flight option
+"Show me pretrained detectors … and let me choose" ticked, the user sees each one's detections, and the first one
+accepted detects every window. Otherwise, or when nobody is there to ask, the image decides:
+
+- **2D fluorescence: agreement with the image.** Each detector is scored against the frame's bright regions
+  (median + 5 MAD of the smoothed frame): recall proxy = regions with a detection, precision proxy = detections on
+  a region. The best mean F1 is taken if it reaches 0.90. Its blind spots: a cell split in two still lands on a
+  bright region, and touching cells read as one region.
+- **Phase contrast and stacks: persistence.** Bright regions are not cells there, so a detector is judged by how
+  many of its detections persist from frame t to t+1 (matched within the measured cell radius), at each of the
+  three trial frames. It must keep at least 0.80 on every pair. Persistence is blind to cells a detector misses
+  consistently, which is why 2D fluorescence keeps the image agreement.
+
+When no detector passes, ELEPHANT's adaptive tracking is used. On data that is not fluorescence, a detector whose
+detections persist on every pair, though too few to be chosen, still provides the seeds for ELEPHANT's first
+training. The choice holds for the whole run. Both thresholds were calibrated on the Cell Tracking Challenge's
+development sequences (01) and should be re-measured on other data.
+
+**Not yet built:** a planner that offers the language model, per stage, the tools that apply and lets it choose.
+Apart from the detector, the plan is fixed, and a tool from the registry cannot yet fill a window stage.
+
+---
 
 ## 2. Internal evaluation metrics
 

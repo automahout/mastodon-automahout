@@ -26,6 +26,9 @@ exclude_patterns = [
     "README.md",
     # Written by the pre-flight analysis (AnalyzeVideoTool); never documentation.
     "video_description*.md",
+    # The benchmark's working notes (scripts/reproduce/README.md links to it); the preprint page points to
+    # paper/README.md and the deposit instead.
+    "paper/benchmark-protocol.md",
     # A run log kept as an example, not a page.
     "example_log.md",
     # On the private manuscript branch only.

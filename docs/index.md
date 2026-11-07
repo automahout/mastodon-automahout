@@ -34,6 +34,6 @@ remote-tools
 :maxdepth: 1
 :caption: The preprint
 
-paper/benchmark-protocol
+preprint
 citation
 ```
