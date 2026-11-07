@@ -171,8 +171,7 @@ public class AutomahoutSettings
 	static final double DEFAULT_CORRECT_ANISOTROPY_THRESHOLD = 10.0;
 
 	/**
-	 * Default start timepoint: {@code -1} = use the viewer's current timepoint
-	 * when the loop is started.
+	 * Default start timepoint: {@code -1} = use the first timepoint in the dataset.
 	 */
 	static final int DEFAULT_START_TIMEPOINT = -1;
 
@@ -475,7 +474,7 @@ public class AutomahoutSettings
 
 	/**
 	 * Start timepoint for the processing loop.
-	 * {@code -1} means "use the viewer's current timepoint when the loop starts".
+	 * {@code -1} means "use the first timepoint in the dataset".
 	 */
 	public int getStartTimepoint()
 	{
