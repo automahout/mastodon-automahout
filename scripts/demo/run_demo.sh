@@ -16,10 +16,12 @@
 # START and END (both): track only that range, from a fresh model, with fixed steps (STEPS=agent lets the agent
 # choose); without them the agent tracks the whole movie, which can take hours.
 #
+# Progress shows in Automahout's log window, as when run from Fiji; its Stop button stops the run.
+#
 # Results in $DEMO_OUT/<run name>/: project.mastodon (open it in Mastodon), RES/ (the tracks in the Cell Tracking
 # Challenge format), run.log (what Automahout measured, decided and corrected), run-info.json, stdout.log.
 set -euo pipefail
-[ $# -ge 2 ] && [ $# -le 3 ] || { sed -n 2,21p "$0"; exit 1; }
+[ $# -ge 2 ] && [ $# -le 3 ] || { sed -n 2,22p "$0"; exit 1; }
 [ -f "$1" ] || { echo "no $1" >&2; exit 1; }
 XML=$(cd "$(dirname "$1")" && pwd)/$(basename "$1"); DATASET=$2
 NAME=${3:-${DATASET}_$(date +%Y%m%d-%H%M%S)}
@@ -31,6 +33,13 @@ OUT=$DEMO_OUT/$NAME
 [ -f "$XML" ] || { echo "no $XML" >&2; exit 1; }
 [ -f "${XML%.xml}.h5" ] || echo "note: no ${XML%.xml}.h5 beside the XML; the XML must name where its data is" >&2
 curl -fs -m 5 "${ELEPHANT_URL}state/process" > /dev/null || { echo "ELEPHANT server not reachable at $ELEPHANT_URL" >&2; exit 1; }
+# Whether the server holds the dataset: an empty shape never matches, so a dataset that exists answers "Invalid
+# shape", one that does not "not found or broken".
+if curl -fs -m 10 -H 'Content-Type: application/json' -d "{\"dataset_name\":\"$DATASET\",\"shape\":[0]}" \
+    "${ELEPHANT_URL}dataset/check" | grep -q "not found or broken"; then
+  echo "the ELEPHANT server at $ELEPHANT_URL has no dataset '$DATASET': generate it there from the .h5" \
+    "(scripts/elephant/generate_dataset.sh), or give the name it was generated under" >&2; exit 1
+fi
 if [ -n "${START:-}${END:-}" ] && { [ -z "${START:-}" ] || [ -z "${END:-}" ]; }; then
   echo "give both START and END, or neither" >&2; exit 1
 fi
@@ -58,6 +67,7 @@ SHORT=()
 
 echo "tracking $XML (ELEPHANT dataset $DATASET) into $OUT; log: $OUT/stdout.log"
 "$JAVA" "${JOPTS[@]}" -Dautomahout.prefs.root="automahout-demo/$NAME" -Dautomahout.remote.servers="${REMOTE_SERVERS:-}" \
+  -Dautomahout.logWindow=true \
   -cp "$CP" org.mastodon.mamut.automahout.bench.BenchmarkRunner \
   xml="$XML" out="$OUT" dataset="$DATASET" run="demo_$NAME" condition=A server="$ELEPHANT_URL" commit="$COMMIT" \
   ${SHORT[@]+"${SHORT[@]}"} > "$OUT/stdout.log" 2>&1 \

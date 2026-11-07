@@ -99,6 +99,9 @@ public final class BenchmarkRunner
 	private BenchmarkRunner()
 	{}
 
+	/** System property: {@code true} shows the plugin's log window (with Stop) during the run. */
+	public static final String PROPERTY_LOG_WINDOW = "automahout.logWindow";
+
 	public static void main( final String[] args ) throws Exception
 	{
 		final Map< String, String > a = new HashMap<>();
@@ -150,9 +153,24 @@ public final class BenchmarkRunner
 			SwingUtilities.invokeAndWait( () -> view[ 0 ] = project.getWindowManager().createBigDataViewer() );
 			final ViewerPanel viewer = view[ 0 ].getViewerPanelMamut();
 			final ToolContext ctx = new ToolContext( pm, viewer );
+			// The plugin's own log window, with its Stop button, when asked for (scripts/demo/run_demo.sh): a
+			// demo is watched, a benchmark run is not.
+			final org.mastodon.mamut.automahout.plugin.AutomahoutLogWindow[] window =
+					new org.mastodon.mamut.automahout.plugin.AutomahoutLogWindow[ 1 ];
+			if ( Boolean.getBoolean( PROPERTY_LOG_WINDOW ) )
+			{
+				SwingUtilities.invokeAndWait( () -> {
+					window[ 0 ] = new org.mastodon.mamut.automahout.plugin.AutomahoutLogWindow();
+					window[ 0 ].setStopCallback( ctx::requestCancel );
+					window[ 0 ].show();
+				} );
+				window[ 0 ].enableStop();
+			}
 			ctx.setLogCallback( line -> {
 				log.println( line );
 				System.out.println( line );
+				if ( window[ 0 ] != null )
+					window[ 0 ].onLogMessage( line );
 			} );
 
 			// ELEPHANT: this process's own server URL and a fresh style from ELEPHANT's defaults.
