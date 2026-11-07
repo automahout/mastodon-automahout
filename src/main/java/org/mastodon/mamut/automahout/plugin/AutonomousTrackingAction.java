@@ -71,6 +71,7 @@ import javax.swing.Timer;
 import org.elephant.setting.main.ElephantMainSettings;
 import org.elephant.setting.main.ElephantMainSettingsManager;
 import org.mastodon.mamut.ProjectModel;
+import org.mastodon.mamut.automahout.tool.RunRange;
 import org.mastodon.mamut.automahout.tool.GraphEdits;
 import org.mastodon.mamut.automahout.tool.CellScale;
 import org.mastodon.mamut.automahout.tool.CleanupToggles;
@@ -1478,6 +1479,24 @@ class AutonomousTrackingAction extends AbstractNamedAction
 				d.startTimepoint != null );
 		final JSpinner spinStartTp = boundedSpinner( context, "start timepoint", 0, 0, 1_000_000, 1 );
 
+		// The timepoints this run tracks and corrects (RunRange). Stated per run and never remembered: kept in the
+		// user's preferences, a range chosen for one movie carried over to the next project and quietly tracked
+		// only part of it. Opens on the whole movie.
+		final int lastTp = lastTimepoint( context );
+		final JSpinner spinRangeStart = boundedSpinner( context, "first timepoint of the range", 0, 0, lastTp, 1 );
+		final JSpinner spinRangeEnd = boundedSpinner( context, "last timepoint of the range", lastTp, 0, lastTp, 1 );
+		final JCheckBox rangeToLastCheck = new JCheckBox( "the last", true );
+		spinRangeEnd.setEnabled( false );
+		rangeToLastCheck.addActionListener( ev -> spinRangeEnd.setEnabled( !rangeToLastCheck.isSelected() ) );
+		spinRangeStart.addChangeListener( ev -> {
+			if ( ( Integer ) spinRangeEnd.getValue() < ( Integer ) spinRangeStart.getValue() )
+				spinRangeEnd.setValue( spinRangeStart.getValue() );
+		} );
+		spinRangeEnd.addChangeListener( ev -> {
+			if ( ( Integer ) spinRangeEnd.getValue() < ( Integer ) spinRangeStart.getValue() )
+				spinRangeStart.setValue( spinRangeEnd.getValue() );
+		} );
+
 		// Diagnostic cleanup switches — both CHECKED by default, i.e. the normal pipeline. They are here
 		// rather than left to the agent's parameters because they are an experiment control: the user
 		// turns one off, re-runs the same window, and compares the two logs. See CleanupToggles.
@@ -1611,7 +1630,7 @@ class AutonomousTrackingAction extends AbstractNamedAction
 		}
 		step1.add( heading( "What only you know" ) );
 		applyExpectedCellsCheck.setText( "Cells per frame —" );
-		applyStartTpCheck.setText( "Start from timepoint:" );
+		applyStartTpCheck.setText( "Begin at timepoint (instead of resuming):" );
 		final JPanel expectedCellsRow = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
 		expectedCellsRow.add( applyExpectedCellsCheck );
 		expectedCellsRow.add( new JLabel( "first timepoint:" ) );
@@ -1621,6 +1640,15 @@ class AutonomousTrackingAction extends AbstractNamedAction
 		step1.add( leftAligned( expectedCellsRow ) );
 		step1.add( note( "Give both ends when the population grows; equal values mean a steady one. The run's flood and "
 				+ "over-deletion checks are calibrated against it. Leave unticked to let the run estimate it." ) );
+		final JPanel rangeRow = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
+		rangeRow.add( new JLabel( "Timepoints to track: from" ) );
+		rangeRow.add( spinRangeStart );
+		rangeRow.add( new JLabel( "to" ) );
+		rangeRow.add( spinRangeEnd );
+		rangeRow.add( rangeToLastCheck );
+		step1.add( leftAligned( rangeRow ) );
+		step1.add( note( "Tracking and correction stay within these timepoints. The whole movie unless you change it; "
+				+ "not remembered for the next run." ) );
 		final JPanel startTpRow = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
 		startTpRow.add( applyStartTpCheck );
 		startTpRow.add( spinStartTp );
@@ -1744,7 +1772,10 @@ class AutonomousTrackingAction extends AbstractNamedAction
 			nextButton.setVisible( current[ 0 ] < steps.length - 1 );
 			startButton.setVisible( current[ 0 ] == steps.length - 1 );
 			if ( current[ 0 ] == steps.length - 1 )
-				summary.setText( summaryHtml( chosenModality[ 0 ], balanceAsCorrections.isSelected(), startFreshCheck.isSelected(),
+				summary.setText( summaryHtml( chosenModality[ 0 ],
+						rangeText( ( Integer ) spinRangeStart.getValue(),
+								rangeToLastCheck.isSelected() ? -1 : ( Integer ) spinRangeEnd.getValue(), lastTp ),
+						balanceAsCorrections.isSelected(), startFreshCheck.isSelected(),
 						applyStartTpCheck.isSelected() ? ( Integer ) spinStartTp.getValue() : null,
 						applyExpectedCellsCheck.isSelected() ? spinExpectedCells.getValue() + " → " + spinExpectedCellsEnd.getValue() : null,
 						shapeFitCheck.isSelected(), askMergesAndDivisionsCheck.isSelected() ) );
@@ -1798,6 +1829,8 @@ class AutonomousTrackingAction extends AbstractNamedAction
 			ASK_PREFS.putBoolean( KEY_SHAPE_FIT, shapeFitCheck.isSelected() );
 			ASK_PREFS.putBoolean( KEY_DETECTIONS_AS_CORRECTIONS, balanceAsCorrections.isSelected() );
 			context.setSharedData( CleanupToggles.SHARED_SHAPE_FIT_OVERRIDE, shapeFitCheck.isSelected() );
+			RunRange.set( context, ( Integer ) spinRangeStart.getValue(),
+					rangeToLastCheck.isSelected() ? -1 : ( Integer ) spinRangeEnd.getValue() );
 			dialog.dispose();
 		} );
 		cancelButton.addActionListener( ev -> {
@@ -1960,12 +1993,34 @@ class AutonomousTrackingAction extends AbstractNamedAction
 		return b.append( "</div></html>" ).toString();
 	}
 
+	/** The movie's last timepoint, from the viewer; a large bound when it cannot be read. */
+	private static int lastTimepoint( final ToolContext context )
+	{
+		try
+		{
+			return Math.max( 0, context.requireViewer().state().getNumTimepoints() - 1 );
+		}
+		catch ( final RuntimeException e )
+		{
+			return 1_000_000;
+		}
+	}
+
+	/** The run's range as the summary shows it; {@code end < 0} = the last timepoint. */
+	static String rangeText( final int start, final int end, final int lastTp )
+	{
+		final int to = end < 0 ? lastTp : end;
+		return String.format( "t=%d..%d", start, to ) + ( start == 0 && to == lastTp ? " (the whole movie)" : "" );
+	}
+
 	/** Step 4's summary of the choices that shape the run most. */
-	static String summaryHtml( final Modality modality, final boolean cellsAsCorrections, final boolean startFresh,
-			final Integer startTimepoint, final String expectedCells, final boolean shapeFit, final boolean ask )
+	static String summaryHtml( final Modality modality, final String range, final boolean cellsAsCorrections,
+			final boolean startFresh, final Integer startTimepoint, final String expectedCells, final boolean shapeFit,
+			final boolean ask )
 	{
 		return "<html><ul style='margin-left:12px'>"
 				+ "<li>Image type: <b>" + modality.label + "</b></li>"
+				+ "<li>Timepoints: <b>" + range + "</b></li>"
 				+ "<li>Training balance: <b>" + ( cellsAsCorrections ? "cells at 10x"
 						: "cells at 1x, negatives at 10x" ) + "</b></li>"
 				+ "<li>Start: <b>" + ( startFresh ? "fresh (all spots deleted)" : "resume" )

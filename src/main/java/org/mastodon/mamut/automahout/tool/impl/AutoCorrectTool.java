@@ -29,6 +29,7 @@
 package org.mastodon.mamut.automahout.tool.impl;
 
 import org.mastodon.mamut.automahout.tool.ToolRole;
+import org.mastodon.mamut.automahout.tool.RunRange;
 import org.scijava.plugin.Plugin;
 import java.util.Map;
 
@@ -306,15 +307,15 @@ public class AutoCorrectTool implements AutomahoutTool
 				}
 			}
 
-			// Correct all timepoints of the Settings range: adaptive_track holds itself to it as a hard bound,
-			// and this pass did not -- a short benchmark run over t=120..159 spent most of its time correcting
-			// the 210 frames outside, and changed them. The whole-movie measurements above still read every frame.
-			final int minTp = Math.max( 0, settings.getStartTimepoint() );
-			final int maxTp = settings.getEndTimepoint() >= 0
-					? Math.min( numTimepoints - 1, settings.getEndTimepoint() ) : numTimepoints - 1;
-			if ( minTp > 0 || maxTp < numTimepoints - 1 )
-				context.log( String.format( "  auto.correct: Settings range t=%d..%d (dataset is t=0..%d).", minTp, maxTp,
-						numTimepoints - 1 ) );
+			// Correct all timepoints of the run's range (RunRange): adaptive_track holds itself to it as a hard
+			// bound, and this pass did not -- a short benchmark run over t=120..159 spent most of its time
+			// correcting the 210 frames outside, and changed them. The whole-movie measurements above still read
+			// every frame.
+			final int[] range = RunRange.bounds( context, numTimepoints );
+			final int minTp = range[ 0 ], maxTp = range[ 1 ];
+			if ( RunRange.restricts( range, numTimepoints ) )
+				context.log( String.format( "  auto.correct: the run's range t=%d..%d (dataset is t=0..%d).", minTp,
+						maxTp, numTimepoints - 1 ) );
 			int totalMerged = 0, totalFilled = 0, totalDeletedLinks = 0, totalDeletedSpots = 0, totalRefit = 0;
 			for ( int t = minTp; t <= maxTp; t++ )
 			{

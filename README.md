@@ -41,9 +41,9 @@ The plugin's items are under *Plugins › Automahout* in a Mastodon project wind
 
 | Item | What it does |
 |---|---|
-| Run Autonomous Tracking… | a short set-up, then the whole run: detection, training, tracking and correction |
+| Run Autonomous Tracking… | a short set-up (including which timepoints to track), then the whole run: detection, training, tracking and correction |
 | Stop Automahout | stops the run |
-| Automahout Settings… | the language-model connection (VLM / LLM tab), and the tracking range and correction parameters (Tracking tab) |
+| Automahout Settings… | the language-model connection (VLM / LLM tab) and the correction parameters (Tracking tab) |
 | Run a Tool… | runs one of Automahout's tools on its own |
 | Advanced › | learns lineage constraints from ground truth or from the current spots and links, and builds a ground-truth annotation store |
 

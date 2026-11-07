@@ -53,8 +53,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * The one settings dialog of the Automahout plugin, in two tabs: <em>VLM / LLM</em> (the vision-language model's
- * backend, model, connection and the pre-flight's snapshots) and <em>Tracking</em> (the timepoint range and the
- * correction passes' parameters). Every field here is read by the tracking pipeline.
+ * backend, model, connection and the pre-flight's snapshots) and <em>Tracking</em> (the correction passes'
+ * parameters; docs/settings.md says where each takes effect). The timepoint range belongs to one run and is set
+ * in the run's set-up, not here.
  *
  * <p>Edits an {@link AutomahoutSettings} instance in place. Changes are applied and persisted only when the user
  * clicks <em>OK</em>; <em>Cancel</em> leaves the settings unchanged. The URL, API-key and region rows show only for
@@ -98,10 +99,6 @@ class AutomahoutSettingsDialog extends JDialog
 	private final JTextField tfOutputFile;
 
 	// ---- Tracking -------------------------------------------------------------
-
-	private final JSpinner spStartTimepoint;
-
-	private final JSpinner spEndTimepoint;
 
 	private final JSpinner spMergeOverlapRatio;
 
@@ -176,13 +173,6 @@ class AutomahoutSettingsDialog extends JDialog
 
 		// ---- Tracking controls ----------------------------------------------
 
-		spStartTimepoint = new JSpinner( new SpinnerNumberModel( settings.getStartTimepoint(), -1, 9999, 1 ) );
-		spStartTimepoint.setToolTipText( "First timepoint to process.  -1 = the first timepoint of the dataset" );
-
-		spEndTimepoint = new JSpinner( new SpinnerNumberModel( settings.getEndTimepoint(), -1, 9999, 1 ) );
-		spEndTimepoint.setToolTipText(
-				"Last timepoint to process (inclusive).  -1 = the last timepoint of the dataset" );
-
 		spMergeOverlapRatio = new JSpinner( new SpinnerNumberModel(
 				settings.getCorrectMergeOverlapRatio(), 0.0, 5.0, 0.1 ) );
 		spMergeOverlapRatio.setToolTipText( "Merge spots when distance < ratio × max(r1,r2).  0.0 = disabled" );
@@ -244,9 +234,6 @@ class AutomahoutSettingsDialog extends JDialog
 		vlm.fill();
 
 		final Form tracking = new Form();
-		tracking.section( "Range" );
-		tracking.row( "Start timepoint (-1 = first):", spStartTimepoint );
-		tracking.row( "End timepoint (-1 = last):", spEndTimepoint );
 		tracking.section( "Correction" );
 		tracking.row( "Merge overlap ratio (0 = off):", spMergeOverlapRatio );
 		tracking.row( "Fill track gaps:", cbFillGaps );
@@ -331,8 +318,6 @@ class AutomahoutSettingsDialog extends JDialog
 		settings.setVlmZSlicesPerTimepoint( ( Integer ) spZSlices.getValue() );
 		settings.setVlmOutputFile( tfOutputFile.getText().trim() );
 
-		settings.setStartTimepoint( ( Integer ) spStartTimepoint.getValue() );
-		settings.setEndTimepoint( ( Integer ) spEndTimepoint.getValue() );
 		settings.setCorrectMergeOverlapRatio( ( Double ) spMergeOverlapRatio.getValue() );
 		settings.setCorrectFillGaps( cbFillGaps.isSelected() );
 		settings.setCorrectGapCropFactor( ( Double ) spGapCropFactor.getValue() );

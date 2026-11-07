@@ -202,10 +202,7 @@ public final class BenchmarkRunner
 				for ( final org.mastodon.mamut.model.Spot sp : clear )
 					org.mastodon.mamut.automahout.tool.GraphEdits.removeSpot( ctx, g, sp,
 							org.mastodon.mamut.automahout.tool.GraphEdits.Reason.BULK );
-				final AutomahoutSettings range = new AutomahoutSettings();
-				range.setStartTimepoint( start );
-				range.setEndTimepoint( end );
-				range.save();
+				org.mastodon.mamut.automahout.tool.RunRange.set( ctx, start, end );
 				ctx.setSharedData( org.mastodon.mamut.automahout.tool.impl.ElephantTool.SHARED_START_TIMEPOINT_OVERRIDE, start );
 				info.put( "range", new JSONObject().put( "start", start ).put( "end", end ).put( "cleared_spots", clear.size() ) );
 			}

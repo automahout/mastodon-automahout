@@ -63,9 +63,7 @@ public class AutomahoutSettings
 
 	private static final String KEY_CORRECT_MIN_SIZE_RATIO = "correctMinSizeRatio";
 
-	private static final String KEY_START_TIMEPOINT = "startTimepoint";
 
-	private static final String KEY_END_TIMEPOINT = "endTimepoint";
 
 	private static final String KEY_CORRECT_MERGE_OVERLAP_RATIO = "correctMergeOverlapRatio";
 
@@ -170,15 +168,6 @@ public class AutomahoutSettings
 	 */
 	static final double DEFAULT_CORRECT_ANISOTROPY_THRESHOLD = 10.0;
 
-	/**
-	 * Default start timepoint: {@code -1} = use the first timepoint in the dataset.
-	 */
-	static final int DEFAULT_START_TIMEPOINT = -1;
-
-	/**
-	 * Default end timepoint: {@code -1} = use the last timepoint in the dataset.
-	 */
-	static final int DEFAULT_END_TIMEPOINT = -1;
 
 	/**
 	 * Default merge overlap ratio: {@code 0.0} = disabled.
@@ -263,9 +252,7 @@ public class AutomahoutSettings
 
 	private double correctMinSizeRatio;
 
-	private int startTimepoint;
 
-	private int endTimepoint;
 
 	private double correctMergeOverlapRatio;
 
@@ -321,8 +308,6 @@ public class AutomahoutSettings
 		correctMinIntensityRatio = PREFS.getDouble( KEY_CORRECT_MIN_INTENSITY_RATIO, DEFAULT_CORRECT_MIN_INTENSITY_RATIO );
 		correctQualityThreshold = PREFS.getDouble( KEY_CORRECT_QUALITY_THRESHOLD, DEFAULT_CORRECT_QUALITY_THRESHOLD );
 		correctMinSizeRatio = PREFS.getDouble( KEY_CORRECT_MIN_SIZE_RATIO, DEFAULT_CORRECT_MIN_SIZE_RATIO );
-		startTimepoint = PREFS.getInt( KEY_START_TIMEPOINT, DEFAULT_START_TIMEPOINT );
-		endTimepoint = PREFS.getInt( KEY_END_TIMEPOINT, DEFAULT_END_TIMEPOINT );
 		correctMergeOverlapRatio = PREFS.getDouble( KEY_CORRECT_MERGE_OVERLAP_RATIO, DEFAULT_CORRECT_MERGE_OVERLAP_RATIO );
 		correctFillGaps = PREFS.getBoolean( KEY_CORRECT_FILL_GAPS, DEFAULT_CORRECT_FILL_GAPS );
 		correctGapCropFactor = PREFS.getDouble( KEY_CORRECT_GAP_CROP_FACTOR, DEFAULT_CORRECT_GAP_CROP_FACTOR );
@@ -351,8 +336,6 @@ public class AutomahoutSettings
 		PREFS.putDouble( KEY_CORRECT_MIN_INTENSITY_RATIO, correctMinIntensityRatio );
 		PREFS.putDouble( KEY_CORRECT_QUALITY_THRESHOLD, correctQualityThreshold );
 		PREFS.putDouble( KEY_CORRECT_MIN_SIZE_RATIO, correctMinSizeRatio );
-		PREFS.putInt( KEY_START_TIMEPOINT, startTimepoint );
-		PREFS.putInt( KEY_END_TIMEPOINT, endTimepoint );
 		PREFS.putDouble( KEY_CORRECT_MERGE_OVERLAP_RATIO, correctMergeOverlapRatio );
 		PREFS.putBoolean( KEY_CORRECT_FILL_GAPS, correctFillGaps );
 		PREFS.putDouble( KEY_CORRECT_GAP_CROP_FACTOR, correctGapCropFactor );
@@ -470,34 +453,6 @@ public class AutomahoutSettings
 	public void setCorrectMinSizeRatio( final double ratio )
 	{
 		this.correctMinSizeRatio = ratio;
-	}
-
-	/**
-	 * Start timepoint for the processing loop.
-	 * {@code -1} means "use the first timepoint in the dataset".
-	 */
-	public int getStartTimepoint()
-	{
-		return startTimepoint;
-	}
-
-	public void setStartTimepoint( final int startTimepoint )
-	{
-		this.startTimepoint = startTimepoint;
-	}
-
-	/**
-	 * End timepoint for the processing loop (inclusive).
-	 * {@code -1} means "use the last timepoint in the dataset".
-	 */
-	public int getEndTimepoint()
-	{
-		return endTimepoint;
-	}
-
-	public void setEndTimepoint( final int endTimepoint )
-	{
-		this.endTimepoint = endTimepoint;
 	}
 
 	/**

@@ -21,12 +21,8 @@ The language model Automahout talks to, and the pre-flight analysis that shows i
 
 ## Tracking tab
 
-### Range
-
-| Field | Default | Description |
-|---|---|---|
-| **Start timepoint (-1 = first)** | -1 | The first timepoint tracked and corrected. |
-| **End timepoint (-1 = last)** | -1 | The last timepoint tracked and corrected (inclusive). |
+The timepoints a run tracks are not set here: they belong to one run and are chosen in its set-up (*Run Autonomous
+Tracking…*, "Timepoints to track"), which opens on the whole movie each time.
 
 ### Correction
 

@@ -29,6 +29,7 @@
 package org.mastodon.mamut.automahout.tool.impl;
 
 import org.mastodon.mamut.automahout.tool.ToolRole;
+import org.mastodon.mamut.automahout.tool.RunRange;
 import org.scijava.plugin.Plugin;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -246,7 +247,7 @@ public class ElephantTool implements AutomahoutTool
 	 * incident this exact mechanism was designed to avoid repeating), shared data lives only on this run's
 	 * {@link ToolContext}, so a cap chosen for one troublesome dataset can never silently affect another.
 	 * The LLM agent has no visibility into this cap and may request a higher value; it is clamped down
-	 * here regardless, mirroring how {@link #settingsTimepointBounds} hard-enforces the timepoint range
+	 * here regardless, mirroring how {@link #runTimepointBounds} hard-enforces the timepoint range
 	 * the agent cannot see. Absent (no key set) means "no cap — trust the agent's choice."
 	 */
 	public static final String SHARED_MAX_REFINE_ITERATIONS = "adaptive_track.max_refine_iterations";
@@ -918,8 +919,8 @@ public class ElephantTool implements AutomahoutTool
 		{
 			final ViewerPanel viewer = context.requireViewer();
 			final int numTimepoints = viewer.state().getNumTimepoints();
-			// [minTp, maxTp]: dataset range narrowed by the Settings dialog's Start/End Timepoint, if set.
-			final int[] tpBounds = settingsTimepointBounds( context, numTimepoints );
+			// [minTp, maxTp]: dataset range narrowed by the run's stated range (RunRange), if any.
+			final int[] tpBounds = runTimepointBounds( context, numTimepoints );
 			final int minTp = tpBounds[ 0 ], maxTp = tpBounds[ 1 ];
 			// Clamp to [minTp, maxTp]. A weak agent sometimes passes end_timepoint=numTimepoints (off-by-one),
 			// which would spawn a spurious empty window (e.g. [t=10..10] on a 10-timepoint t=0..9 dataset)
@@ -1066,7 +1067,7 @@ public class ElephantTool implements AutomahoutTool
 					: DEFAULT_COMPLETENESS_TARGET;
 			// Hard, run-scoped ceilings from the pre-flight review dialog (see SHARED_MAX_REFINE_ITERATIONS)
 			// — the agent cannot see these and may request more; clamp down regardless, the same way
-			// settingsTimepointBounds() enforces a range the agent also cannot see.
+			// runTimepointBounds() enforces a range the agent also cannot see.
 			final Object refineCap = context.getSharedData( SHARED_MAX_REFINE_ITERATIONS );
 			if ( refineCap instanceof Number && refineIterationsRequested > ( ( Number ) refineCap ).intValue() )
 			{
@@ -1205,7 +1206,7 @@ public class ElephantTool implements AutomahoutTool
 		{
 			final ViewerPanel viewer = context.requireViewer();
 			final int numTimepoints = viewer.state().getNumTimepoints();
-			final int[] tpBounds = settingsTimepointBounds( context, numTimepoints );
+			final int[] tpBounds = runTimepointBounds( context, numTimepoints );
 			final int minTp = tpBounds[ 0 ], maxTp = tpBounds[ 1 ];
 			final int startTp = params.containsKey( PARAM_START_TIMEPOINT )
 					? Math.max( minTp, Math.min( maxTp, ( ( Number ) params.get( PARAM_START_TIMEPOINT ) ).intValue() ) )
@@ -1235,7 +1236,7 @@ public class ElephantTool implements AutomahoutTool
 		{
 			final ViewerPanel viewer = context.requireViewer();
 			final int numTimepoints = viewer.state().getNumTimepoints();
-			final int[] tpBounds = settingsTimepointBounds( context, numTimepoints );
+			final int[] tpBounds = runTimepointBounds( context, numTimepoints );
 			final int minTp = tpBounds[ 0 ], maxTp = tpBounds[ 1 ];
 			final int startTp = params.containsKey( PARAM_START_TIMEPOINT )
 					? Math.max( minTp, Math.min( maxTp, ( ( Number ) params.get( PARAM_START_TIMEPOINT ) ).intValue() ) )
@@ -1267,7 +1268,7 @@ public class ElephantTool implements AutomahoutTool
 		{
 			final ViewerPanel viewer = context.requireViewer();
 			final int numTimepoints = viewer.state().getNumTimepoints();
-			final int[] tpBounds = settingsTimepointBounds( context, numTimepoints );
+			final int[] tpBounds = runTimepointBounds( context, numTimepoints );
 			final int minTp = tpBounds[ 0 ], maxTp = tpBounds[ 1 ];
 			final int startTp = params.containsKey( PARAM_START_TIMEPOINT )
 					? Math.max( minTp, Math.min( maxTp, ( ( Number ) params.get( PARAM_START_TIMEPOINT ) ).intValue() ) )
@@ -1305,7 +1306,7 @@ public class ElephantTool implements AutomahoutTool
 		// ---- multi-timepoint mode ----
 		final ViewerPanel viewer = context.requireViewer();
 		final int numTimepoints = viewer.state().getNumTimepoints();
-		final int[] tpBounds = settingsTimepointBounds( context, numTimepoints );
+		final int[] tpBounds = runTimepointBounds( context, numTimepoints );
 		final int minTp = tpBounds[ 0 ], maxTp = tpBounds[ 1 ];
 
 		final int startTp = params.containsKey( PARAM_START_TIMEPOINT )
@@ -9121,23 +9122,18 @@ public class ElephantTool implements AutomahoutTool
 	}
 
 	/**
-	 * Returns {@code [minTp, maxTp]}: the dataset's {@code [0, numTimepoints-1]} range narrowed by the
-	 * user's Settings dialog Start/End Timepoint, if set ({@code -1} means unset). The autonomous-tracking
-	 * LLM agent has no visibility into that Settings dialog and picks its own start/end per turn, so this
-	 * is enforced here as a hard bound rather than left to the agent to request correctly.
+	 * Returns {@code [minTp, maxTp]}: the dataset's {@code [0, numTimepoints-1]} range narrowed by the range stated
+	 * in the run's set-up ({@link RunRange}). The autonomous-tracking LLM agent picks its own start/end per turn, so
+	 * this is enforced here as a hard bound rather than left to the agent to request correctly.
 	 */
-	private static int[] settingsTimepointBounds( final ToolContext context, final int numTimepoints )
+	private static int[] runTimepointBounds( final ToolContext context, final int numTimepoints )
 	{
-		final AutomahoutSettings settings = new AutomahoutSettings();
-		final int maxTp = settings.getEndTimepoint() >= 0
-				? Math.min( numTimepoints - 1, settings.getEndTimepoint() ) : numTimepoints - 1;
-		final int minTp = settings.getStartTimepoint() >= 0
-				? Math.min( maxTp, Math.max( 0, settings.getStartTimepoint() ) ) : 0;
-		if ( minTp > 0 || maxTp < numTimepoints - 1 )
+		final int[] bounds = RunRange.bounds( context, numTimepoints );
+		if ( RunRange.restricts( bounds, numTimepoints ) )
 			context.log( String.format(
-					"  Settings range restricts processing to t=%d..%d (dataset is t=0..%d).",
-					minTp, maxTp, numTimepoints - 1 ) );
-		return new int[] { minTp, maxTp };
+					"  The run's range restricts processing to t=%d..%d (dataset is t=0..%d).",
+					bounds[ 0 ], bounds[ 1 ], numTimepoints - 1 ) );
+		return bounds;
 	}
 
 	/**
