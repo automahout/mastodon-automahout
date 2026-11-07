@@ -6805,7 +6805,8 @@ public class ElephantTool implements AutomahoutTool
 			{
 				final List< double[] > ss = e.getValue();
 				// The whole frame, as the commit will predict it: a crop of the image's extent is capped at the patch size.
-				final List< double[] > detections = detectionsOf( elephant.predictSpotsOnFrame( e.getKey() ) );
+				final List< double[] > detections = detectionsOf( elephant.predictSpotsOnFrame( e.getKey() ),
+						context.isVolumetric() );
 				final org.mastodon.mamut.automahout.tool.FrameReview.Result review = org.mastodon.mamut.automahout.tool.FrameReview
 						.review( detections, ss, blobsAt.getOrDefault( e.getKey(), java.util.Collections.emptyList() ), r );
 				found += review.found;
@@ -7192,20 +7193,25 @@ public class ElephantTool implements AutomahoutTool
 	}
 
 	/** {x, y, z, radius} of each predicted spot; empty when the prediction failed. */
-	private static List< double[] > detectionsOf( final List< org.json.JSONObject > preds )
+	private static List< double[] > detectionsOf( final List< org.json.JSONObject > preds, final boolean volumetric )
 	{
 		final List< double[] > out = new ArrayList<>();
 		if ( preds != null )
 			for ( final org.json.JSONObject o : preds )
 			{
 				final org.json.JSONArray p = o.getJSONArray( "pos" );
-				out.add( new double[] { p.getDouble( 0 ), p.getDouble( 1 ), p.getDouble( 2 ), radiusOf( o ) } );
+				out.add( new double[] { p.getDouble( 0 ), p.getDouble( 1 ), p.getDouble( 2 ), radiusOf( o, volumetric ) } );
 			}
 		return out;
 	}
 
-	/** The radius of a sphere of a predicted spot's volume, from its JSON covariance; NaN without one. */
-	private static double radiusOf( final org.json.JSONObject o )
+	/**
+	 * A predicted spot's radius from its JSON covariance (NaN without one): the sphere of its volume on a stack, the
+	 * circle of its area on a single plane ({@link SpotShape#interiorRadius}). On a plane ELEPHANT gives every spot a
+	 * z semi-axis of 1, which the volume counted: an 8.3 µm cell read as 4.1 µm, the review's size held at 0.55x of
+	 * the reference cells on Fluo-N2DL-HeLa round after round, and its Go never came.
+	 */
+	static double radiusOf( final org.json.JSONObject o, final boolean volumetric )
 	{
 		final org.json.JSONArray c = o.optJSONArray( "covariance" );
 		if ( c == null || c.length() != 9 )
@@ -7213,10 +7219,7 @@ public class ElephantTool implements AutomahoutTool
 		final double[][] m = new double[ 3 ][ 3 ];
 		for ( int i = 0; i < 9; i++ )
 			m[ i / 3 ][ i % 3 ] = c.getDouble( i );
-		final double det = m[ 0 ][ 0 ] * ( m[ 1 ][ 1 ] * m[ 2 ][ 2 ] - m[ 1 ][ 2 ] * m[ 2 ][ 1 ] )
-				- m[ 0 ][ 1 ] * ( m[ 1 ][ 0 ] * m[ 2 ][ 2 ] - m[ 1 ][ 2 ] * m[ 2 ][ 0 ] )
-				+ m[ 0 ][ 2 ] * ( m[ 1 ][ 0 ] * m[ 2 ][ 1 ] - m[ 1 ][ 1 ] * m[ 2 ][ 0 ] );
-		return det > 0 ? Math.pow( det, 1.0 / 6 ) : Double.NaN;
+		return SpotShape.interiorRadius( m, volumetric );
 	}
 
 	/**

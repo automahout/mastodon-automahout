@@ -141,22 +141,23 @@ public class ReviewFrameTool implements AutomahoutTool
 			sb.append( " and " ).append( ps.size() - 10 ).append( " more" );
 	}
 
-	/** {x, y, z, radius} of each spot at {@code t}; radius of the sphere of the spot's volume. */
+	/**
+	 * {x, y, z, radius} of each spot at {@code t}; the radius of the sphere of the spot's volume on a stack, of the
+	 * circle of its area on a single plane (the volume counted the z semi-axis a 2D spot does not have).
+	 */
 	private static List< double[] > spotsAt( final ToolContext context, final int t )
 	{
 		final List< double[] > out = new ArrayList<>();
 		final double[][] cov = new double[ 3 ][ 3 ];
+		final boolean volumetric = context.isVolumetric();
 		context.getGraph().getLock().readLock().lock();
 		try
 		{
 			for ( final Spot s : context.getModel().getSpatioTemporalIndex().getSpatialIndex( t ) )
 			{
 				s.getCovariance( cov );
-				final double det = cov[ 0 ][ 0 ] * ( cov[ 1 ][ 1 ] * cov[ 2 ][ 2 ] - cov[ 1 ][ 2 ] * cov[ 2 ][ 1 ] )
-						- cov[ 0 ][ 1 ] * ( cov[ 1 ][ 0 ] * cov[ 2 ][ 2 ] - cov[ 1 ][ 2 ] * cov[ 2 ][ 0 ] )
-						+ cov[ 0 ][ 2 ] * ( cov[ 1 ][ 0 ] * cov[ 2 ][ 1 ] - cov[ 1 ][ 1 ] * cov[ 2 ][ 0 ] );
 				out.add( new double[] { s.getDoublePosition( 0 ), s.getDoublePosition( 1 ), s.getDoublePosition( 2 ),
-						det > 0 ? Math.pow( det, 1.0 / 6 ) : Double.NaN } );
+						org.mastodon.mamut.automahout.tool.SpotShape.interiorRadius( cov, volumetric ) } );
 			}
 		}
 		finally
