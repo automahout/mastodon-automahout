@@ -100,7 +100,7 @@ fit uses the first configured server listing `sam.fit` (example: `examples/sam-f
 
 `POST /fit/sam.fit/run` takes one plane and the detections on it, in that plane's pixels:
 
-```json
+```text
 {"frame": {"t": 0, "shape": [Y, X], "dtype": "float32", "data": "<base64, little-endian>"},
  "points": [[x, y], ...], "negatives": 4}
 ```

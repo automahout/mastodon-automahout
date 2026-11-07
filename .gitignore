@@ -28,3 +28,6 @@ debug.yaml
 
 # The pre-flight analysis writes its movie description here (AnalyzeVideoTool)
 docs/video_description*.md
+
+# The Sphinx build (docs/conf.py)
+/docs/_build/
