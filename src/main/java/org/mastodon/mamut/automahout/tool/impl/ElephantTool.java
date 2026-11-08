@@ -9843,7 +9843,7 @@ public class ElephantTool implements AutomahoutTool
 		{
 			final int[][] c = ( int[][] ) counts;
 			GuessedCeiling.takeCounts( ctx, SHARED_COLD_START_CEILING_OVERRIDE, Math.max( 1, c[ 1 ][ 0 ] ),
-					Math.max( 1, c[ 1 ][ c[ 1 ].length - 1 ] ), "you accepted " + chosen.getId() + " in the trial",
+					Math.max( 1, c[ 1 ][ c[ 1 ].length - 1 ] ), org.mastodon.mamut.automahout.tool.remote.DetectorTrial.howChosen( chosen.getId() ),
 					"its counts at t=" + c[ 0 ][ 0 ] + " and t=" + c[ 0 ][ c[ 0 ].length - 1 ] + ", replacing the agent's guess" );
 		}
 		return chosen;

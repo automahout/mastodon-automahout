@@ -150,6 +150,21 @@ public class DetectorTrialTest
 	}
 
 	@Test
+	public void theLogSaysHowTheDetectorWasChosen()
+	{
+		assertEquals( "you accepted stardist.fluo in the trial", DetectorTrial.howChosen( "stardist.fluo" ) );
+		System.setProperty( DetectorTrial.PROPERTY_DETECTOR, "stardist.fluo" );
+		try
+		{
+			assertEquals( "you named stardist.fluo for this run", DetectorTrial.howChosen( "stardist.fluo" ) );
+		}
+		finally
+		{
+			System.clearProperty( DetectorTrial.PROPERTY_DETECTOR );
+		}
+	}
+
+	@Test
 	public void namingElephantSkipsThePretrainedDetectors()
 	{
 		System.setProperty( DetectorTrial.PROPERTY_DETECTOR, "elephant" );

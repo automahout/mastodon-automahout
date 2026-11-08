@@ -672,6 +672,13 @@ public final class DetectorTrial
 	 */
 	public static final String PROPERTY_DETECTOR = "automahout.detector";
 
+	/** How detector {@code id} came to be used, for the log: named for the run, or accepted in the trial. */
+	public static String howChosen( final String id )
+	{
+		return id.equals( System.getProperty( PROPERTY_DETECTOR, "" ).trim() ) ? "you named " + id + " for this run"
+				: "you accepted " + id + " in the trial";
+	}
+
 	/**
 	 * The detector named by {@link #PROPERTY_DETECTOR}. It detects the trial frames as an accepted one does, so its
 	 * counts replace the agent's guess at the cell count as when a person accepts it in the dialog. A name no tool
