@@ -22,14 +22,15 @@
 #
 # Progress shows in Automahout's log window, as when run from Fiji, beside the image; its Stop button stops the run.
 #
-# RECORD=<file.mp4> records the screen to a video with ffmpeg while the run lasts (RECORD_FPS, default 5). Without a
-# display (a Linux server), the run gets a virtual one (Xvfb, RECORD_SIZE, default 1920x1080) and the video shows
-# it. On macOS the terminal needs the Screen Recording permission (System Settings > Privacy & Security).
+# RECORD=<file.mp4> records the screen to a video with ffmpeg while the run lasts (RECORD_FPS, default 5), in the run
+# folder unless the path is absolute. Without a display (a Linux server), the run gets a virtual one (Xvfb,
+# RECORD_SIZE, default 1920x1080) and the video shows it. On macOS the terminal needs the Screen Recording
+# permission (System Settings > Privacy & Security).
 #
 # Results in $DEMO_OUT/<run name>/: project.mastodon (open it in Mastodon), RES/ (the tracks in the Cell Tracking
 # Challenge format), run.log (what Automahout measured, decided and corrected), run-info.json, stdout.log.
 set -euo pipefail
-[ $# -ge 2 ] && [ $# -le 3 ] || { sed -n 2,30p "$0"; exit 1; }
+[ $# -ge 2 ] && [ $# -le 3 ] || { sed -n 2,31p "$0"; exit 1; }
 [ -f "$1" ] || { echo "no $1" >&2; exit 1; }
 XML=$(cd "$(dirname "$1")" && pwd)/$(basename "$1"); DATASET=$2
 NAME=${3:-${DATASET}_$(date +%Y%m%d-%H%M%S)}
@@ -68,7 +69,10 @@ if [ -n "${DETECTOR:-}" ] && [ "$DETECTOR" != elephant ]; then
 fi
 if [ -n "${RECORD:-}" ]; then
   command -v ffmpeg > /dev/null || { echo "RECORD needs ffmpeg" >&2; exit 1; }
-  case "$RECORD" in /*) ;; *) RECORD=$PWD/$RECORD ;; esac
+  # A relative name goes into the run folder, with the run's other results (not the folder the script was started
+  # from, which was the repository); an absolute path is used as given.
+  case "$RECORD" in /*) ;; *) RECORD=$OUT/$RECORD ;; esac
+  case "$RECORD" in "$OUT"/*) ;; *) mkdir -p "$(dirname "$RECORD")" ;; esac
 fi
 
 # Built from the commit, never from a working tree (a running Mastodon may be using one's target/).
