@@ -134,6 +134,14 @@ if [ -n "${RECORD:-}" ]; then
   fi
   sleep 2
   kill -0 "$FFMPEG_PID" 2> /dev/null || { FFMPEG_PID=; echo "RECORD: ffmpeg did not start (see $OUT/ffmpeg.log)" >&2; exit 1; }
+  # Frames arriving: ffmpeg creates the file only once the first frame is encoded. A capture that gets none (another
+  # recording holding the screen, or no Screen Recording permission on macOS) never writes it and ignores SIGINT.
+  for _ in 1 2 3 4 5 6 7 8; do [ -s "$RECORD" ] && break; sleep 1; done
+  if [ ! -s "$RECORD" ]; then
+    kill -KILL "$FFMPEG_PID" 2> /dev/null || true; FFMPEG_PID=
+    echo "RECORD: no frames reach ffmpeg after 10 s -- is another screen recording running (pgrep -fl ffmpeg), or" \
+      "does the terminal lack the Screen Recording permission? The run was not started." >&2; exit 1
+  fi
   echo "recording the screen to $RECORD"
 fi
 
