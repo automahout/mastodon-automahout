@@ -9816,7 +9816,12 @@ public class ElephantTool implements AutomahoutTool
 		final ToolContext ctx = w.context;
 		final org.mastodon.mamut.automahout.tool.ToolRegistry registry =
 				org.mastodon.mamut.automahout.tool.ToolRegistry.forContext( ctx );
-		boolean any = ctx.getSharedData( org.mastodon.mamut.automahout.tool.remote.DetectorTrial.SHARED_CHOICE ) != null;
+		// A detector named for the run is always looked for, so a name no server offers is refused instead of
+		// passed over: with no tool server reachable, the check below skipped the choice, and a run told to use
+		// cellpose.cpsam tracked with ELEPHANT without a word.
+		boolean any = ctx.getSharedData( org.mastodon.mamut.automahout.tool.remote.DetectorTrial.SHARED_CHOICE ) != null
+				|| !System.getProperty( org.mastodon.mamut.automahout.tool.remote.DetectorTrial.PROPERTY_DETECTOR, "" ).trim()
+						.isEmpty();
 		for ( final org.mastodon.mamut.automahout.tool.AutomahoutTool t : registry.getAll() )
 			any |= t instanceof org.mastodon.mamut.automahout.tool.remote.FrameDetector;
 		if ( !any )

@@ -55,6 +55,17 @@ fi
 if [ -n "${START:-}${END:-}" ] && { [ -z "${START:-}" ] || [ -z "${END:-}" ]; }; then
   echo "give both START and END, or neither" >&2; exit 1
 fi
+# A named detector must be on offer: ask each tool server for its tools before anything starts.
+if [ -n "${DETECTOR:-}" ] && [ "$DETECTOR" != elephant ]; then
+  [ -n "${REMOTE_SERVERS:-}" ] || { echo "DETECTOR=$DETECTOR needs REMOTE_SERVERS, the tool server(s) that offer it" >&2; exit 1; }
+  OFFERED=
+  for S in ${REMOTE_SERVERS//,/ }; do
+    curl -fs -m 10 "${S%/}/tools" | grep -q "\"id\" *: *\"$DETECTOR\"" && OFFERED=$S
+  done
+  [ -n "$OFFERED" ] || { echo "no server in REMOTE_SERVERS ($REMOTE_SERVERS) offers $DETECTOR: is its tool server" \
+    "running?" >&2; exit 1; }
+  echo "detector: $DETECTOR, from $OFFERED"
+fi
 if [ -n "${RECORD:-}" ]; then
   command -v ffmpeg > /dev/null || { echo "RECORD needs ffmpeg" >&2; exit 1; }
   case "$RECORD" in /*) ;; *) RECORD=$PWD/$RECORD ;; esac
