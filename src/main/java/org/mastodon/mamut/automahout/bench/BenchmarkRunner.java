@@ -246,6 +246,14 @@ public final class BenchmarkRunner
 
 			final long t0 = System.nanoTime();
 			final String guidance = BatchPreflight.run( ctx, start < 0, oracle != null, false );
+			// What the vision model saw: the plugin shows it in the set-up dialog, which a demo does not have, so
+			// it goes to the log window (and the file it was always written to).
+			if ( window[ 0 ] != null )
+			{
+				final Object movie = ctx.getSharedData( org.mastodon.mamut.automahout.tool.impl.AnalyzeVideoTool.SHARED_DATA_KEY );
+				if ( movie != null && !movie.toString().trim().isEmpty() )
+					ctx.log( "  What the vision model saw:\n" + movie.toString().replaceAll( "(?s)<!--.*?-->\\s*", "" ).trim() );
+			}
 			final long t1 = System.nanoTime();
 			final Map< String, Object > params = new HashMap<>();
 			if ( !guidance.trim().isEmpty() )
