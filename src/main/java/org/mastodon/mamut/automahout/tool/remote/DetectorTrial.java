@@ -122,6 +122,15 @@ public final class DetectorTrial
 	/** Bright = this many spreads (MAD) above the smoothed frame's median, the frame's own scale. */
 	static final double AGREEMENT_SPREADS = 5.0;
 
+	/**
+	 * Signal = a detection's interior median this many spreads above the frame's median: the no-signal pass's
+	 * ceiling (1.5 sigma on the frame), measured there on 3245 detections against CTC silver truth to catch 76.6% of
+	 * those on no cell for 0.57% of the real ones. The precision proxy counts a detection there as on a cell. Without it, a dim nucleus below
+	 * the bright cut counted as a false detection: on a dense urothelial movie Cellpose-SAM and StarDist, which find
+	 * the dim nuclei, scored precision ~0.5 and were refused.
+	 */
+	static final double SIGNAL_SPREADS = 1.5;
+
 	/** Bright regions smaller than this many pixels are specks, not cells. */
 	static final int AGREEMENT_MIN_REGION_PX = 30;
 
@@ -521,13 +530,18 @@ public final class DetectorTrial
 	}
 
 	/**
-	 * {precision proxy, recall proxy} of {@code dets} against the frame's bright regions (see
-	 * {@link #chooseFromImage}). A stack is read as its maximum projection.
+	 * {precision proxy, recall proxy} of {@code dets} against the frame (see {@link #chooseFromImage}). Recall: the
+	 * share of the bright regions with a detection on them. Precision: the share of detections on signal -- on a
+	 * bright region, or with an interior median {@link #SIGNAL_SPREADS} spreads above the frame's. A stack is read as
+	 * its maximum projection.
 	 */
 	static double[] imageAgreement( final Frame f, final List< FrameDetector.Detection > dets )
 	{
 		final int w = ( int ) f.dims[ 0 ], h = ( int ) f.dims[ 1 ];
 		final int[] labels = brightRegions( f );
+		final float[] plane = projection( f );
+		final double[] ms = medianAndSpread( plane );
+		final double signal = ms[ 0 ] + SIGNAL_SPREADS * ms[ 1 ];
 		int regions = 0;
 		for ( final int l : labels )
 			regions = Math.max( regions, l );
@@ -544,6 +558,8 @@ public final class DetectorTrial
 				on++;
 				hit[ l ] = true;
 			}
+			else if ( interiorMedian( plane, w, h, d ) > signal )
+				on++; // a dim cell below the bright cut is a cell, not a false detection
 		}
 		int covered = 0;
 		for ( int l = 1; l <= regions; l++ )
@@ -551,6 +567,58 @@ public final class DetectorTrial
 				covered++;
 		return new double[] { dets.isEmpty() ? 0 : on / ( double ) dets.size(),
 				regions == 0 ? 0 : covered / ( double ) regions };
+	}
+
+	/** The frame's maximum projection (the plane itself for a single plane). */
+	static float[] projection( final Frame f )
+	{
+		final int w = ( int ) f.dims[ 0 ], h = ( int ) f.dims[ 1 ], d = ( int ) f.dims[ 2 ];
+		final float[] plane = new float[ w * h ];
+		Arrays.fill( plane, Float.NEGATIVE_INFINITY );
+		for ( int z = 0; z < d; z++ )
+			for ( int i = 0; i < plane.length; i++ )
+				plane[ i ] = Math.max( plane[ i ], f.data[ z * plane.length + i ] );
+		return plane;
+	}
+
+	/** The projection smoothed as the bright regions are found on it (Gaussian, sigma 2 px). */
+	static float[] smoothedProjection( final Frame f )
+	{
+		return gaussian( projection( f ), ( int ) f.dims[ 0 ], ( int ) f.dims[ 1 ], 2.0 );
+	}
+
+	/**
+	 * The median of the pixels inside detection {@code d} (its in-plane radius from the covariance, at least 1 px), as
+	 * the no-signal pass reads a detection's interior: a median, so a detection half on a cell is not carried by it.
+	 */
+	static double interiorMedian( final float[] plane, final int w, final int h, final FrameDetector.Detection d )
+	{
+		final double[][] c = d.covariance;
+		final double det = c[ 0 ][ 0 ] * c[ 1 ][ 1 ] - c[ 0 ][ 1 ] * c[ 1 ][ 0 ];
+		final double r = Math.max( 1, Math.min( 50, det > 0 ? Math.pow( det, 0.25 ) : 1 ) );
+		final int cx = ( int ) Math.round( d.centroid[ 0 ] ), cy = ( int ) Math.round( d.centroid[ 1 ] ), ri = ( int ) Math.ceil( r );
+		final List< Float > v = new ArrayList<>();
+		for ( int y = Math.max( 0, cy - ri ); y <= Math.min( h - 1, cy + ri ); y++ )
+			for ( int x = Math.max( 0, cx - ri ); x <= Math.min( w - 1, cx + ri ); x++ )
+				if ( ( x - cx ) * ( x - cx ) + ( y - cy ) * ( y - cy ) <= r * r )
+					v.add( plane[ y * w + x ] );
+		if ( v.isEmpty() )
+			return Double.NEGATIVE_INFINITY;
+		Collections.sort( v );
+		return v.get( v.size() / 2 );
+	}
+
+	/** {median, spread} of {@code v}; spread = 1.4826 x the median absolute deviation (sigma for a normal). */
+	static double[] medianAndSpread( final float[] v )
+	{
+		final float[] sorted = v.clone();
+		Arrays.sort( sorted );
+		final double med = sorted[ sorted.length / 2 ];
+		final float[] dev = new float[ v.length ];
+		for ( int i = 0; i < v.length; i++ )
+			dev[ i ] = ( float ) Math.abs( v[ i ] - med );
+		Arrays.sort( dev );
+		return new double[] { med, 1.4826 * dev[ dev.length / 2 ] };
 	}
 
 	/** Labels (1..n, row-major) of the frame's bright regions; 0 = background or a speck. */

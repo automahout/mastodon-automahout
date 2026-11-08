@@ -320,6 +320,37 @@ public class DetectorTrialTest
 		assertEquals( 0.0, background[ 0 ], 1e-9 );
 	}
 
+	/**
+	 * A dim nucleus -- above the background, below the bright cut -- is a cell to the precision proxy, not a false
+	 * detection; empty background still is one. The background has a broad texture (stripes 40 px wide) that the
+	 * smoothing keeps, as real tissue backgrounds do: it holds the bright cut high, and that is where dim nuclei fell
+	 * below it -- on a dense urothelial movie Cellpose-SAM and StarDist, which find them, scored precision ~0.5.
+	 */
+	@Test
+	public void aDetectionOnADimNucleusIsNotCountedFalse()
+	{
+		final int w = 300, h = 60;
+		final java.util.Random rnd = new java.util.Random( 2 );
+		final float[] px = new float[ w * h ];
+		for ( int y = 0; y < h; y++ )
+			for ( int x = 0; x < w; x++ )
+				px[ y * w + x ] = ( float ) ( 100 + 20 * Math.sin( 2 * Math.PI * x / 40 ) + 3 * rnd.nextGaussian() );
+		for ( int c = 0; c < 10; c++ )
+			for ( int y = 0; y < h; y++ )
+				for ( int x = 0; x < w; x++ )
+					if ( Math.hypot( x - ( 15 + 30 * c ), y - 30 ) <= 6 )
+						px[ y * w + x ] += 60; // 1.5 spreads above the frame even in a trough, short of the bright cut on a crest
+		final Frame f = new Frame( 0, new long[] { w, h, 1 }, px, new double[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0 } );
+		assertEquals( "the dim nuclei are below the bright cut", 0,
+				java.util.Arrays.stream( DetectorTrial.brightRegions( f ) ).max().getAsInt() );
+		final double[] onDim = DetectorTrial.imageAgreement( f, detectNow( reporting( "dim", cells( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) ), f ) );
+		assertEquals( 1.0, onDim[ 0 ], 1e-9 );
+		// Empty background, in the stripes' troughs and on their crests, away from the nuclei (y = 30).
+		final double[] onEmpty = DetectorTrial.imageAgreement( f, detectNow( reporting( "empty",
+				new double[][] { { 30, 6 }, { 110, 54 }, { 190, 8 }, { 50, 52 }, { 130, 7 } } ), f ) );
+		assertEquals( 0.0, onEmpty[ 0 ], 1e-9 );
+	}
+
 	@Test
 	public void theDetectorThatAgreesBestIsChosenAndAPoorFieldMeansElephant()
 	{

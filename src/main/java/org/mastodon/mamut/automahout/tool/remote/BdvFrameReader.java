@@ -62,6 +62,13 @@ public final class BdvFrameReader implements Frame.Reader
 		return readTyped( ( Source ) sources.get( 0 ).getSpimSource(), t );
 	}
 
+	/** Timepoint {@code t} of {@code source} at full resolution, as {@link #read} reads the viewer's first source. */
+	@SuppressWarnings( { "unchecked", "rawtypes" } )
+	static Frame read( final Source< ? > source, final int t )
+	{
+		return readTyped( ( Source ) source, t );
+	}
+
 	@Override
 	@SuppressWarnings( { "unchecked", "rawtypes" } )
 	public CellScale.Sample readForCellScale( final int t )
