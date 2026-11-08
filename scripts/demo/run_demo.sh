@@ -117,8 +117,10 @@ if [ -n "${RECORD:-}" ]; then
     SCREEN=$( { ffmpeg -hide_banner -f avfoundation -list_devices true -i "" 2>&1 || true; } \
       | sed -n 's/.*\[\([0-9]*\)\] Capture screen 0.*/\1/p' | head -1)
     [ -n "$SCREEN" ] || { echo "RECORD: ffmpeg finds no screen to capture" >&2; exit 1; }
-    ffmpeg -hide_banner -loglevel error -f avfoundation -pixel_format uyvy422 -framerate 30 -capture_cursor 1 -i "$SCREEN:none" -r "$FPS" \
-      -vf "scale=1920:-2" -c:v libx264 -preset ultrafast -pix_fmt yuv420p -y "$RECORD" < /dev/null > "$OUT/ffmpeg.log" 2>&1 &
+    # No input frame rate: a display may refuse the one asked for ("Configuration of video device failed"), and
+    # its rate is then misread (1000k fps) and frames duplicated without end. The fps filter sets the output's.
+    ffmpeg -hide_banner -loglevel error -f avfoundation -pixel_format uyvy422 -capture_cursor 1 -i "$SCREEN:none" \
+      -vf "fps=$FPS,scale=1920:-2" -c:v libx264 -preset ultrafast -pix_fmt yuv420p -y "$RECORD" < /dev/null > "$OUT/ffmpeg.log" 2>&1 &
     FFMPEG_PID=$!
   else
     SIZE=${RECORD_SIZE:-1920x1080}
