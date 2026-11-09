@@ -21,6 +21,8 @@
 # on one sparse culture; on dense tissue it can refuse a detector you would take.
 #
 # Progress shows in Automahout's log window, as when run from Fiji, beside the image; its Stop button stops the run.
+# ELEPHANT's own progress comes over its RabbitMQ, with the connection of the entry for ELEPHANT_URL in your ELEPHANT
+# server settings (ELEPHANT_SETTINGS, default ~/.mastodon/Plugins/Elephant/elephant_server_settings.yaml).
 #
 # RECORD=<file.mp4> records the screen to a video with ffmpeg while the run lasts (RECORD_FPS, default 5), in the run
 # folder unless the path is absolute. Without a display (a Linux server), the run gets a virtual one (Xvfb,
@@ -30,7 +32,7 @@
 # Results in $DEMO_OUT/<run name>/: project.mastodon (open it in Mastodon), RES/ (the tracks in the Cell Tracking
 # Challenge format), run.log (what Automahout measured, decided and corrected), run-info.json, stdout.log.
 set -euo pipefail
-[ $# -ge 2 ] && [ $# -le 3 ] || { sed -n 2,31p "$0"; exit 1; }
+[ $# -ge 2 ] && [ $# -le 3 ] || { sed -n 2,33p "$0"; exit 1; }
 [ -f "$1" ] || { echo "no $1" >&2; exit 1; }
 XML=$(cd "$(dirname "$1")" && pwd)/$(basename "$1"); DATASET=$2
 NAME=${3:-${DATASET}_$(date +%Y%m%d-%H%M%S)}
@@ -93,6 +95,10 @@ export AWS_CONFIG_FILE=${AWS_CONFIG_FILE:-$HOME/.aws/config}
 JOPTS=(-Xmx12g --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED
   --add-opens=java.desktop/sun.awt=ALL-UNNAMED --add-opens=java.desktop/javax.swing=ALL-UNNAMED
   -Duser.home="$OUT/home")
+# Your ELEPHANT server settings (as Fiji's ELEPHANT keeps them): the entry for ELEPHANT_URL lends its RabbitMQ
+# connection, so the server's progress (epochs, losses, frames) shows in the log as it does from Fiji.
+ELEPHANT_SETTINGS=${ELEPHANT_SETTINGS:-$HOME/.mastodon/Plugins/Elephant/elephant_server_settings.yaml}
+[ -f "$ELEPHANT_SETTINGS" ] || ELEPHANT_SETTINGS=
 SHORT=()
 [ -z "${START:-}" ] || SHORT=(start="$START" end="$END" steps="${STEPS:-fixed}")
 
@@ -154,6 +160,7 @@ fi
 echo "tracking $XML (ELEPHANT dataset $DATASET) into $OUT; log: $OUT/stdout.log"
 "$JAVA" "${JOPTS[@]}" -Dautomahout.prefs.root="automahout-demo/$NAME" -Dautomahout.remote.servers="${REMOTE_SERVERS:-}" \
   -Dautomahout.logWindow=true -Dautomahout.detector="${DETECTOR:-}" \
+  -Dautomahout.elephant.serverSettings="$ELEPHANT_SETTINGS" \
   -cp "$CP" org.mastodon.mamut.automahout.bench.BenchmarkRunner \
   xml="$XML" out="$OUT" dataset="$DATASET" run="demo_$NAME" condition=A server="$ELEPHANT_URL" commit="$COMMIT" \
   ${SHORT[@]+"${SHORT[@]}"} > "$OUT/stdout.log" 2>&1 \

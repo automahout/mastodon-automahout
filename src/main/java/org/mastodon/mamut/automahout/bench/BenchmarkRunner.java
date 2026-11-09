@@ -99,6 +99,14 @@ public final class BenchmarkRunner
 	private BenchmarkRunner()
 	{}
 
+	/**
+	 * System property: the path of the person's ELEPHANT server settings ({@code ~/.mastodon/Plugins/Elephant/
+	 * elephant_server_settings.yaml}). The entry whose server URL is this run's lends its RabbitMQ connection, so the
+	 * server's progress messages reach the log. A run isolates the user's settings (user.home is its own); this takes
+	 * only that connection, in memory, and records neither the user name nor the password.
+	 */
+	public static final String PROPERTY_ELEPHANT_SERVER_SETTINGS = "automahout.elephant.serverSettings";
+
 	/** System property: {@code true} shows the plugin's log window (with Stop) during the run. */
 	public static final String PROPERTY_LOG_WINDOW = "automahout.logWindow";
 
@@ -183,6 +191,12 @@ public final class BenchmarkRunner
 
 			// ELEPHANT: this process's own server URL and a fresh style from ELEPHANT's defaults.
 			ElephantServerSettingsManager.getInstance().getForwardDefaultStyle().setServerURL( server );
+			// The server's RabbitMQ, from the person's own ELEPHANT settings when the script names them: its messages
+			// (epochs, losses, frames) are relayed to the log, as the GUI shows them.
+			final String serverSettings = System.getProperty( PROPERTY_ELEPHANT_SERVER_SETTINGS, "" ).trim();
+			if ( !serverSettings.isEmpty() )
+				info.put( "rabbitmq", org.mastodon.mamut.automahout.elephant.RabbitMqFromSettings.apply( Paths.get( serverSettings ), server,
+						ElephantServerSettingsManager.getInstance().getForwardDefaultStyle(), log::println ) );
 			final ElephantMainSettingsManager styles = ElephantMainSettingsManager.getInstance();
 			final ElephantMainSettings style = styles.duplicate( ElephantMainSettings.defaultStyle() );
 			final String id = "automahout-bench-" + a.get( "run" );
