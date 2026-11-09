@@ -351,6 +351,50 @@ public class DetectorTrialTest
 		assertEquals( 0.0, onEmpty[ 0 ], 1e-9 );
 	}
 
+	/**
+	 * The review's background check ({@link DetectorTrial#onSignal}): a place on a dim nucleus reads as signal, an
+	 * empty place does not; world coordinates go through the frame's transform (here 0.5 µm voxels, offset 10 µm).
+	 */
+	@Test
+	public void aDimNucleusReadsAsSignalAndEmptySpaceDoesNot()
+	{
+		final int w = 120, h = 60;
+		final java.util.Random rnd = new java.util.Random( 3 );
+		final float[] px = new float[ w * h ];
+		for ( int y = 0; y < h; y++ )
+			for ( int x = 0; x < w; x++ )
+				px[ y * w + x ] = ( float ) ( 100 + 20 * Math.sin( 2 * Math.PI * x / 40 ) + 3 * rnd.nextGaussian() );
+		for ( int y = 0; y < h; y++ )
+			for ( int x = 0; x < w; x++ )
+				if ( Math.hypot( x - 60, y - 30 ) <= 6 )
+					px[ y * w + x ] += 60;
+		final Frame f = new Frame( 0, new long[] { w, h, 1 }, px, new double[] { 0.5, 0, 0, 10, 0, 0.5, 0, 10, 0, 0, 1, 0 } );
+		final double[] stats = DetectorTrial.frameStats( f );
+		assertTrue( DetectorTrial.onSignal( f, stats, new double[] { 10 + 60 * 0.5, 10 + 30 * 0.5, 0 }, 2.5 ) );
+		assertFalse( DetectorTrial.onSignal( f, stats, new double[] { 10 + 30 * 0.5, 10 + 8 * 0.5, 0 }, 2.5 ) ); // trough
+		assertFalse( DetectorTrial.onSignal( f, stats, new double[] { 10 + 10 * 0.5, 10 + 50 * 0.5, 0 }, 2.5 ) ); // crest
+	}
+
+	/** In a stack the check reads the ball around the place, so a nucleus on another plane does not lend its light. */
+	@Test
+	public void inAStackANucleusOnAnotherPlaneIsNotSignalHere()
+	{
+		final int w = 40, h = 40, d = 20;
+		final float[] px = new float[ w * h * d ];
+		final java.util.Random rnd = new java.util.Random( 4 );
+		for ( int i = 0; i < px.length; i++ )
+			px[ i ] = ( float ) ( 100 + 5 * rnd.nextGaussian() );
+		for ( int z = 0; z < d; z++ )
+			for ( int y = 0; y < h; y++ )
+				for ( int x = 0; x < w; x++ )
+					if ( Math.sqrt( ( x - 20 ) * ( x - 20 ) + ( y - 20 ) * ( y - 20 ) + ( z - 15 ) * ( z - 15 ) ) <= 4 )
+						px[ ( z * h + y ) * w + x ] = 300;
+		final Frame f = new Frame( 0, new long[] { w, h, d }, px, new double[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0 } );
+		final double[] stats = DetectorTrial.frameStats( f );
+		assertTrue( DetectorTrial.onSignal( f, stats, new double[] { 20, 20, 15 }, 3 ) );
+		assertFalse( DetectorTrial.onSignal( f, stats, new double[] { 20, 20, 3 }, 3 ) );
+	}
+
 	@Test
 	public void theDetectorThatAgreesBestIsChosenAndAPoorFieldMeansElephant()
 	{

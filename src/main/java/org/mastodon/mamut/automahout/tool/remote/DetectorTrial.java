@@ -569,6 +569,54 @@ public final class DetectorTrial
 				regions == 0 ? 0 : covered / ( double ) regions };
 	}
 
+	/**
+	 * Whether the image under a place reads as a cell rather than background: the median of the voxels within
+	 * {@code radius} (world units) of {@code world} stands {@link #SIGNAL_SPREADS} spreads above the frame's median --
+	 * the rule the precision proxy uses, on the frame's own voxels (in 3D, a ball, not a projection). Bright means
+	 * signal: fluorescence only, which the caller checks.
+	 *
+	 * @param stats the frame's {median, spread}, from {@link #frameStats} (computed once per frame)
+	 */
+	public static boolean onSignal( final Frame f, final double[] stats, final double[] world, final double radius )
+	{
+		final net.imglib2.realtransform.AffineTransform3D toWorld = new net.imglib2.realtransform.AffineTransform3D();
+		toWorld.set( f.voxelToWorld );
+		final double[] v = new double[ 3 ];
+		toWorld.applyInverse( v, new double[] { world[ 0 ], world[ 1 ], world.length > 2 ? world[ 2 ] : 0 } );
+		final int w = ( int ) f.dims[ 0 ], h = ( int ) f.dims[ 1 ], d = ( int ) f.dims[ 2 ];
+		// Voxel extent of the radius along each axis (columns of the transform).
+		final double[] r = new double[ 3 ];
+		for ( int a = 0; a < 3; a++ )
+		{
+			final double len = Math.sqrt( f.voxelToWorld[ a ] * f.voxelToWorld[ a ] + f.voxelToWorld[ 4 + a ] * f.voxelToWorld[ 4 + a ]
+					+ f.voxelToWorld[ 8 + a ] * f.voxelToWorld[ 8 + a ] );
+			r[ a ] = len > 0 ? Math.max( 0.5, radius / len ) : 0.5;
+		}
+		final List< Float > vals = new ArrayList<>();
+		for ( int z = ( int ) Math.max( 0, Math.floor( v[ 2 ] - r[ 2 ] ) ); z <= Math.min( d - 1, Math.ceil( v[ 2 ] + r[ 2 ] ) ); z++ )
+			for ( int y = ( int ) Math.max( 0, Math.floor( v[ 1 ] - r[ 1 ] ) ); y <= Math.min( h - 1, Math.ceil( v[ 1 ] + r[ 1 ] ) ); y++ )
+				for ( int x = ( int ) Math.max( 0, Math.floor( v[ 0 ] - r[ 0 ] ) ); x <= Math.min( w - 1, Math.ceil( v[ 0 ] + r[ 0 ] ) ); x++ )
+				{
+					final double dx = ( x - v[ 0 ] ) / r[ 0 ], dy = ( y - v[ 1 ] ) / r[ 1 ], dz = d > 1 ? ( z - v[ 2 ] ) / r[ 2 ] : 0;
+					if ( dx * dx + dy * dy + dz * dz <= 1 )
+						vals.add( f.data[ ( z * h + y ) * w + x ] );
+				}
+		if ( vals.isEmpty() )
+			return false;
+		Collections.sort( vals );
+		return vals.get( vals.size() / 2 ) > stats[ 0 ] + SIGNAL_SPREADS * stats[ 1 ];
+	}
+
+	/** {median, spread} of the frame's voxels (at most a million of them, evenly strided). */
+	public static double[] frameStats( final Frame f )
+	{
+		final int step = Math.max( 1, f.data.length / 1_000_000 );
+		final float[] v = new float[ ( f.data.length + step - 1 ) / step ];
+		for ( int i = 0, j = 0; i < f.data.length; i += step )
+			v[ j++ ] = f.data[ i ];
+		return medianAndSpread( v );
+	}
+
 	/** The frame's maximum projection (the plane itself for a single plane). */
 	static float[] projection( final Frame f )
 	{

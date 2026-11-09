@@ -6768,6 +6768,9 @@ public class ElephantTool implements AutomahoutTool
 		int bestRound = -1, passed = 0;
 		// Every blob at the cells' size per frame, not only the references taken from them: what a prediction may sit on.
 		final java.util.Map< Integer, List< double[] > > blobsAt = new java.util.HashMap<>();
+		// The frames, read once, for the background check on false hits (onEmptyImage); and how many it spared.
+		final java.util.Map< Integer, Object[] > frameAt = new java.util.HashMap<>();
+		final int[] onSignalKept = { 0 };
 		for ( final Integer t : references.keySet() )
 			blobsAt.put( t, org.mastodon.mamut.automahout.tool.VisualColdStart.blobs( firstSource( context ), t, r ) );
 		// References the model keeps missing get a closer look (see askAboutDoubtfulReferences); how many rounds running
@@ -6878,7 +6881,7 @@ public class ElephantTool implements AutomahoutTool
 					// (the user: 20-30%); the probe's uncapped marks reached 35 fp for 4 nuclei.
 					final int[] n = annotationCounts( context, e.getKey() );
 					final int room = Math.max( 0, ( int ) Math.floor( SEED_NEGATIVE_FRACTION * n[ 0 ] / ( 1 - SEED_NEGATIVE_FRACTION ) ) - n[ 1 ] );
-					final List< double[] > fs = e.getValue();
+					final List< double[] > fs = onEmptyImage( context, e.getKey(), e.getValue(), r, frameAt, onSignalKept );
 					marked += markCorrection( context, e.getKey(), fs.subList( 0, Math.min( fs.size(), room ) ), r, true );
 				}
 			}
@@ -6887,7 +6890,10 @@ public class ElephantTool implements AutomahoutTool
 					bound, falseHits, sizeRatio, go ? "Go"
 							: ( pass ? "passes (" + passed + " of " + GO_CONSECUTIVE + " rounds running)" : "train on" )
 									+ ( reannotated > 0 ? ", " + reannotated + " missed reference(s) annotated again (fn)" : "" )
-									+ ( marked > 0 ? ", " + marked + " false hit(s) marked background" : "" ) ) );
+									+ ( marked > 0 ? ", " + marked + " false hit(s) marked background" : "" )
+									+ ( onSignalKept[ 0 ] > 0 ? ", " + onSignalKept[ 0 ] + " left unlabelled: the image under them "
+											+ "reads as a cell" : "" ) ) );
+			onSignalKept[ 0 ] = 0;
 			if ( go )
 				return true;
 		}
@@ -7231,6 +7237,42 @@ public class ElephantTool implements AutomahoutTool
 	 *
 	 * @return how many corrections were made (marks added or annotations re-tagged)
 	 */
+	/**
+	 * The false hits at {@code t} the image does not contradict: a detection far from every reference and every blob
+	 * is marked background only where the image under it reads as background ({@link DetectorTrial#onSignal}). A dim
+	 * nucleus below the blob threshold is a cell the model found, not a false hit; marked background, it taught
+	 * ELEPHANT that dim nuclei are background (seen on a dense urothelial movie). Bright means signal, so on images
+	 * that do not read as fluorescence every false hit is kept, as before.
+	 *
+	 * @param frames per timepoint {Frame, {median, spread}}, filled as read
+	 * @param spared incremented by the false hits left unlabelled
+	 */
+	static List< double[] > onEmptyImage( final ToolContext context, final int t, final List< double[] > falseHits,
+			final double radius, final java.util.Map< Integer, Object[] > frames, final int[] spared )
+	{
+		if ( falseHits.isEmpty()
+				|| !Boolean.TRUE.equals( org.mastodon.mamut.automahout.tool.DataProfile.of( context ).fluorescenceLike ) )
+			return falseHits;
+		Object[] fs = frames.get( t );
+		if ( fs == null )
+		{
+			final org.mastodon.mamut.automahout.tool.remote.Frame f =
+					org.mastodon.mamut.automahout.tool.remote.DetectorTrial.reader( context ).read( t );
+			fs = f == null ? new Object[ 0 ] : new Object[] { f, org.mastodon.mamut.automahout.tool.remote.DetectorTrial.frameStats( f ) };
+			frames.put( t, fs );
+		}
+		if ( fs.length == 0 )
+			return falseHits;
+		final List< double[] > out = new ArrayList<>();
+		for ( final double[] p : falseHits )
+			if ( org.mastodon.mamut.automahout.tool.remote.DetectorTrial.onSignal(
+					( org.mastodon.mamut.automahout.tool.remote.Frame ) fs[ 0 ], ( double[] ) fs[ 1 ], p, radius ) )
+				spared[ 0 ]++;
+			else
+				out.add( p );
+		return out;
+	}
+
 	private static int markCorrection( final ToolContext context, final int timepoint, final List< double[] > positions,
 			final double radius, final boolean background )
 	{
