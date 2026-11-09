@@ -104,6 +104,58 @@ public final class ElephantRabbitMqMonitor implements AutoCloseable
 
 	private Channel channel;
 
+	/**
+	 * The run-wide monitor, when one is open ({@link #startShared}): it holds the run's only connection and relays every
+	 * message, during inference as during training. ELEPHANT's {@code update} and {@code log} are named queues, and two
+	 * consumers on one share its messages round-robin, so a second connection would take half of them -- a training
+	 * call's "DONE" among them. Per-call monitors therefore attach to it instead of connecting.
+	 */
+	private static volatile ElephantRabbitMqMonitor shared;
+
+	/** The per-call monitors attached to this (shared) one: each sees every message for its own completion check. */
+	private final java.util.Set< ElephantRabbitMqMonitor > listeners = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+	/** Whether this monitor is attached to the shared one rather than connected itself. */
+	private volatile boolean attached;
+
+	/**
+	 * Opens the run-wide monitor: one connection for the run, relaying every server message to {@code sink}. Per-call
+	 * monitors started afterwards attach to it. Returns whether it connected.
+	 */
+	public static synchronized boolean startShared( final ElephantServerSettings settings, final Consumer< String > sink )
+	{
+		closeShared();
+		final ElephantRabbitMqMonitor m = new ElephantRabbitMqMonitor( sink, null );
+		if ( !m.connect( settings ) )
+			return false;
+		shared = m;
+		return true;
+	}
+
+	/** Makes {@code m} the run-wide monitor without connecting it (tests deliver its messages with {@link #deliver}). */
+	static void shareForTest( final ElephantRabbitMqMonitor m )
+	{
+		shared = m;
+	}
+
+	/** One message from the {@code update} queue, handled as a delivery is (relay, completion, attached monitors). */
+	void deliver( final String msg )
+	{
+		markMessage();
+		relay( "[ELEPHANT] " + msg );
+		checkCompletion( msg );
+		forward( msg );
+	}
+
+	/** Closes the run-wide monitor, if one is open. */
+	public static synchronized void closeShared()
+	{
+		final ElephantRabbitMqMonitor m = shared;
+		shared = null;
+		if ( m != null )
+			m.close();
+	}
+
 	/** Outcome of {@link #awaitCompletion(long, long)}. */
 	public enum Result
 	{
@@ -142,6 +194,18 @@ public final class ElephantRabbitMqMonitor implements AutoCloseable
 	 * fall back to HTTP-only completion detection.
 	 */
 	public boolean start( final ElephantServerSettings settings )
+	{
+		final ElephantRabbitMqMonitor s = shared;
+		if ( s != null && s != this )
+		{
+			attached = true;
+			s.listeners.add( this );
+			return true;
+		}
+		return connect( settings );
+	}
+
+	private boolean connect( final ElephantServerSettings settings )
 	{
 		try
 		{
@@ -196,6 +260,7 @@ public final class ElephantRabbitMqMonitor implements AutoCloseable
 			final String msg = new String( delivery.getBody(), StandardCharsets.UTF_8 );
 			relay( "[ELEPHANT] " + msg );
 			checkCompletion( msg );
+			forward( msg );
 		};
 	}
 
@@ -216,7 +281,18 @@ public final class ElephantRabbitMqMonitor implements AutoCloseable
 				relay( "[ELEPHANT] " + body );
 			}
 			checkCompletion( message );
+			forward( message );
 		};
+	}
+
+	/** Passes a message to the attached per-call monitors, which check their own completion but do not relay it. */
+	private void forward( final String message )
+	{
+		for ( final ElephantRabbitMqMonitor l : listeners )
+		{
+			l.markMessage();
+			l.checkCompletion( message );
+		}
 	}
 
 	/** Records that a server notification arrived (feeds the log-silence fallback) and wakes any awaiter. */
@@ -362,6 +438,14 @@ public final class ElephantRabbitMqMonitor implements AutoCloseable
 	@Override
 	public void close()
 	{
+		if ( attached )
+		{
+			final ElephantRabbitMqMonitor s = shared;
+			if ( s != null )
+				s.listeners.remove( this );
+			attached = false;
+			return;
+		}
 		try
 		{
 			if ( channel != null && channel.isOpen() )

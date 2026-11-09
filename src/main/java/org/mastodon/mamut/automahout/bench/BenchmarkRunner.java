@@ -195,8 +195,18 @@ public final class BenchmarkRunner
 			// (epochs, losses, frames) are relayed to the log, as the GUI shows them.
 			final String serverSettings = System.getProperty( PROPERTY_ELEPHANT_SERVER_SETTINGS, "" ).trim();
 			if ( !serverSettings.isEmpty() )
-				info.put( "rabbitmq", org.mastodon.mamut.automahout.elephant.RabbitMqFromSettings.apply( Paths.get( serverSettings ), server,
-						ElephantServerSettingsManager.getInstance().getForwardDefaultStyle(), log::println ) );
+			{
+				final JSONObject rabbit = org.mastodon.mamut.automahout.elephant.RabbitMqFromSettings.apply( Paths.get( serverSettings ), server,
+						ElephantServerSettingsManager.getInstance().getForwardDefaultStyle(), log::println );
+				info.put( "rabbitmq", rabbit );
+				// One connection for the whole run, relaying the server's progress in training and inference alike
+				// (the per-call monitors attach to it; see ElephantRabbitMqMonitor.startShared).
+				if ( rabbit.optBoolean( "used" ) )
+					ctx.log( org.mastodon.mamut.automahout.elephant.ElephantRabbitMqMonitor.startShared(
+							ElephantServerSettingsManager.getInstance().getForwardDefaultStyle(), ctx::log )
+									? "  ELEPHANT's progress: connected to its RabbitMQ (" + rabbit.optString( "host" ) + ")."
+									: "  ELEPHANT's progress: its RabbitMQ could not be reached; the log stays quiet while it works." );
+			}
 			final ElephantMainSettingsManager styles = ElephantMainSettingsManager.getInstance();
 			final ElephantMainSettings style = styles.duplicate( ElephantMainSettings.defaultStyle() );
 			final String id = "automahout-bench-" + a.get( "run" );
@@ -316,6 +326,7 @@ public final class BenchmarkRunner
 		}
 		finally
 		{
+			org.mastodon.mamut.automahout.elephant.ElephantRabbitMqMonitor.closeShared();
 			info.put( "finished", Instant.now().toString() );
 			Files.write( out.resolve( "run-info.json" ), info.toString( 1 ).getBytes( StandardCharsets.UTF_8 ) );
 			log.close();
