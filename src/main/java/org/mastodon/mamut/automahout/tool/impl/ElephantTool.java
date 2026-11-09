@@ -6812,10 +6812,15 @@ public class ElephantTool implements AutomahoutTool
 						context.isVolumetric() );
 				final org.mastodon.mamut.automahout.tool.FrameReview.Result review = org.mastodon.mamut.automahout.tool.FrameReview
 						.review( detections, ss, blobsAt.getOrDefault( e.getKey(), java.util.Collections.emptyList() ), r );
+				// A "false hit" on a cell the references left out -- a dim nucleus below the blob threshold -- is a cell
+				// the model found. Counted false, it kept the review from a Go and made the round that found fewest of
+				// them the "best" (a dense urothelial movie: 302 predicted kept over 380), so it is counted neither as
+				// false nor as flooding; only false hits on empty image are (fluorescence; elsewhere all, as before).
+				final List< double[] > onEmpty = onEmptyImage( context, e.getKey(), review.falseHits, r, frameAt, onSignalKept );
 				found += review.found;
 				refs += review.references;
-				predicted += review.predicted;
-				falseHits += review.falseHits.size();
+				predicted += review.predicted - ( review.falseHits.size() - onEmpty.size() );
+				falseHits += onEmpty.size();
 				bound += GO_MAX_FLOOD * Math.max( seenCount, ss.size() );
 				if ( !Double.isNaN( review.sizeRatio ) )
 					ratios.add( review.sizeRatio );
@@ -6833,7 +6838,7 @@ public class ElephantTool implements AutomahoutTool
 						hit.add( s );
 					}
 				foundAt.put( e.getKey(), hit );
-				falseAt.put( e.getKey(), review.falseHits.subList( 0, Math.min( review.falseHits.size(), cap ) ) );
+				falseAt.put( e.getKey(), onEmpty.subList( 0, Math.min( onEmpty.size(), cap ) ) );
 			}
 			java.util.Collections.sort( ratios );
 			final double sizeRatio = ratios.isEmpty() ? Double.NaN : ratios.get( ratios.size() / 2 );
@@ -6881,7 +6886,7 @@ public class ElephantTool implements AutomahoutTool
 					// (the user: 20-30%); the probe's uncapped marks reached 35 fp for 4 nuclei.
 					final int[] n = annotationCounts( context, e.getKey() );
 					final int room = Math.max( 0, ( int ) Math.floor( SEED_NEGATIVE_FRACTION * n[ 0 ] / ( 1 - SEED_NEGATIVE_FRACTION ) ) - n[ 1 ] );
-					final List< double[] > fs = onEmptyImage( context, e.getKey(), e.getValue(), r, frameAt, onSignalKept );
+					final List< double[] > fs = e.getValue(); // false hits on empty image only (see onEmptyImage above)
 					marked += markCorrection( context, e.getKey(), fs.subList( 0, Math.min( fs.size(), room ) ), r, true );
 				}
 			}
@@ -6891,8 +6896,8 @@ public class ElephantTool implements AutomahoutTool
 							: ( pass ? "passes (" + passed + " of " + GO_CONSECUTIVE + " rounds running)" : "train on" )
 									+ ( reannotated > 0 ? ", " + reannotated + " missed reference(s) annotated again (fn)" : "" )
 									+ ( marked > 0 ? ", " + marked + " false hit(s) marked background" : "" )
-									+ ( onSignalKept[ 0 ] > 0 ? ", " + onSignalKept[ 0 ] + " left unlabelled: the image under them "
-											+ "reads as a cell" : "" ) ) );
+									+ ( onSignalKept[ 0 ] > 0 ? "; " + onSignalKept[ 0 ] + " more detection(s) on cells the references "
+											+ "left out (the image under them reads as a cell): not counted false, not marked" : "" ) ) );
 			onSignalKept[ 0 ] = 0;
 			if ( go )
 				return true;
@@ -7148,16 +7153,25 @@ public class ElephantTool implements AutomahoutTool
 		}
 		final java.util.Map< Integer, List< double[] > > refs = new java.util.LinkedHashMap<>();
 		int total = 0;
+		int dimTotal = 0;
 		for ( final int t : tps )
 		{
-			// Only blobs a person would annotate without hesitation; the faint rest still keep a detection on them from
-			// being called false (blobsAt in the proofreading loop is every blob).
-			final List< double[] > b = org.mastodon.mamut.automahout.tool.VisualColdStart.confidentBlobs( src, t, r );
+			// Blobs a person would annotate without hesitation, and the dim nuclei the image shows to be cells (see
+			// addDimReferences); the faint rest still keep a detection on them from being called false (blobsAt in the
+			// proofreading loop is every blob, and a false hit on signal is not counted).
+			final List< double[] > b = new ArrayList<>( org.mastodon.mamut.automahout.tool.VisualColdStart.confidentBlobs( src, t, r ) );
 			if ( b.isEmpty() )
 				continue;
+			final int dim = addDimReferences( context, src, t, r, b );
+			if ( dim > 0 )
+				dimTotal += dim;
 			refs.put( t, b );
 			total += placeSeedSpots( context, b, t, r );
 		}
+		if ( dimTotal > 0 )
+			context.log( String.format( "  Review: %d of them dim nuclei -- blobs below the bright cut whose image reads as a "
+					+ "cell (interior median %.1f spreads above the frame's).", dimTotal,
+					org.mastodon.mamut.automahout.tool.remote.DetectorTrial.SIGNAL_SPREADS ) );
 		if ( refs.isEmpty() )
 			return;
 		final int[] refTps = refs.keySet().stream().mapToInt( Integer::intValue ).toArray();
@@ -7237,6 +7251,35 @@ public class ElephantTool implements AutomahoutTool
 	 *
 	 * @return how many corrections were made (marks added or annotations re-tagged)
 	 */
+	/**
+	 * Adds to {@code refs} (the confident blobs at {@code t}) the dim nuclei: candidate blobs below the bright cut
+	 * ({@link org.mastodon.mamut.automahout.tool.VisualColdStart#dimBlobs}) where the image under them reads as a cell
+	 * ({@link org.mastodon.mamut.automahout.tool.remote.DetectorTrial#onSignal}). Only the bright blobs used to be
+	 * taught as cells: on a dense urothelial movie that was ~74 of ~250 nuclei a frame, and ELEPHANT learned bright
+	 * nuclei only. Fluorescence only (bright means signal); elsewhere nothing is added.
+	 *
+	 * @return how many were added
+	 */
+	static int addDimReferences( final ToolContext context, final bdv.viewer.Source< ? > src, final int t, final double r,
+			final List< double[] > refs )
+	{
+		if ( !Boolean.TRUE.equals( org.mastodon.mamut.automahout.tool.DataProfile.of( context ).fluorescenceLike ) )
+			return 0;
+		final org.mastodon.mamut.automahout.tool.remote.Frame f =
+				org.mastodon.mamut.automahout.tool.remote.DetectorTrial.reader( context ).read( t );
+		if ( f == null )
+			return 0;
+		final double[] stats = org.mastodon.mamut.automahout.tool.remote.DetectorTrial.frameStats( f );
+		int added = 0;
+		for ( final double[] p : org.mastodon.mamut.automahout.tool.VisualColdStart.dimBlobs( src, t, r, refs ) )
+			if ( org.mastodon.mamut.automahout.tool.remote.DetectorTrial.onSignal( f, stats, p, r ) )
+			{
+				refs.add( p );
+				added++;
+			}
+		return added;
+	}
+
 	/**
 	 * The false hits at {@code t} the image does not contradict: a detection far from every reference and every blob
 	 * is marked background only where the image under it reads as background ({@link DetectorTrial#onSignal}). A dim

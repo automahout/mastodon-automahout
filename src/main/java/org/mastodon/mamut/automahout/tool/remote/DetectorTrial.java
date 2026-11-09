@@ -129,7 +129,7 @@ public final class DetectorTrial
 	 * the bright cut counted as a false detection: on a dense urothelial movie Cellpose-SAM and StarDist, which find
 	 * the dim nuclei, scored precision ~0.5 and were refused.
 	 */
-	static final double SIGNAL_SPREADS = 1.5;
+	public static final double SIGNAL_SPREADS = 1.5;
 
 	/** Bright regions smaller than this many pixels are specks, not cells. */
 	static final int AGREEMENT_MIN_REGION_PX = 30;

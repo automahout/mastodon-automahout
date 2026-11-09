@@ -301,6 +301,39 @@ public final class VisualColdStart
 		return response( f, radius ).maxima();
 	}
 
+	/**
+	 * The bar for candidate dim nuclei: blobs this many MADs above the frame's median LoG response, below
+	 * {@link #BLOB_MADS}. Only a candidate: it stands as a reference cell only where the image under it reads as a
+	 * cell (ElephantTool's review checks it), so the bar may be low.
+	 */
+	static final double DIM_BLOB_MADS = 3.0;
+
+	/**
+	 * Candidate dim nuclei of frame {@code t}: blobs at {@link #DIM_BLOB_MADS}, more than one radius from every blob in
+	 * {@code known}. {x, y, z} in world coordinates, strongest first.
+	 */
+	public static List< double[] > dimBlobs( final Source< ? > source, final int t, final double radius,
+			final List< double[] > known )
+	{
+		final Frame f = Frame.read( source, t );
+		final List< double[] > out = new ArrayList<>();
+		if ( f == null || !( radius > 0 ) )
+			return out;
+		for ( final double[] p : response( f, radius, DIM_BLOB_MADS ).maxima() )
+		{
+			boolean near = false;
+			for ( final double[] k : known )
+				if ( Math.hypot( Math.hypot( p[ 1 ] - k[ 0 ], p[ 2 ] - k[ 1 ] ), p[ 3 ] - k[ 2 ] ) <= radius )
+				{
+					near = true;
+					break;
+				}
+			if ( !near )
+				out.add( new double[] { p[ 1 ], p[ 2 ], p[ 3 ] } );
+		}
+		return out;
+	}
+
 	/** Below this share of the frame's median blob response a blob is too faint to stand as a reference cell. */
 	public static final double CONFIDENT_SHARE = 0.5;
 
@@ -497,6 +530,12 @@ public final class VisualColdStart
 
 	static Response response( final Frame f, final double radius )
 	{
+		return response( f, radius, BLOB_MADS );
+	}
+
+	/** {@link #response} with the maxima's bar at {@code mads} MADs above the frame's median response. */
+	static Response response( final Frame f, final double radius, final double mads )
+	{
 		final int b = Math.max( 1, ( int ) Math.floor( BLOB_VOXEL_PER_RADIUS * radius / f.vx ) );
 		final Frame c = f.binned( b );
 		final double sx = radius / Math.sqrt( c.nz > 1 ? 3 : 2 ) / c.vx;
@@ -526,7 +565,7 @@ public final class VisualColdStart
 			dev[ i ] = ( float ) Math.abs( lap[ i ] - med );
 		Arrays.sort( dev );
 		final double mad = 1.4826 * dev[ dev.length / 2 ];
-		final double bar = med + BLOB_MADS * mad;
+		final double bar = med + mads * mad;
 		return new Response( c, lap, radius, bar );
 	}
 
