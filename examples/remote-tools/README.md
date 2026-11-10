@@ -22,6 +22,10 @@ cd examples/remote-tools
 uv run python server.py --port 8765
 ```
 
+To use it from another machine, listen on every network interface with `--host 0.0.0.0` and give Automahout
+`http://<this machine>:8765`. The server has no authentication: anyone who can reach the port can send it images to
+segment, so keep it on a trusted network or behind a firewall (the default, `127.0.0.1`, accepts this machine only).
+
 With [uv](https://docs.astral.sh/uv/): the first run creates the environment from `pyproject.toml` and
 `uv.lock` (cellpose 3.0.10, stardist 0.9.1, tensorflow 2.16.2 on the CPU, torch 2.4.0; all from PyPI), so the
 detectors give the same results on any machine. Any other Python environment with numpy, scikit-image and

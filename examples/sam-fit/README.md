@@ -9,6 +9,10 @@ cd examples/sam-fit
 uv run python server.py --port 8766
 ```
 
+To use it from another machine, listen on every network interface with `--host 0.0.0.0` and give Automahout
+`http://<this machine>:8766`. The server has no authentication: anyone who can reach the port can send it images to
+segment, so keep it on a trusted network or behind a firewall (the default, `127.0.0.1`, accepts this machine only).
+
 Then add `http://127.0.0.1:8766` to the remote tool servers (Automahout > Run tool, or
 `-Dautomahout.remote.servers=http://127.0.0.1:8766`). The first start downloads micro-SAM's `vit_b_lm` model
 (about 410 MB) into micro_sam's cache. `--device` picks `mps`, `cuda` or `cpu`.

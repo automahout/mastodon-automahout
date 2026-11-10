@@ -1,6 +1,6 @@
 """Automahout shape-fit server: a micro-SAM mask at each detection's centre, returned as its centroid and moments.
 
-    uv run python server.py [--port 8766] [--model vit_b_lm] [--device mps|cuda|cpu]
+    uv run python server.py [--port 8766] [--host 127.0.0.1] [--model vit_b_lm] [--device mps|cuda|cpu]
 
 Speaks automahout-remote/1 (docs/remote-tools.md). Detectors (GET /tools, chosen by Automahout's detector trial like
 any remote detector): microsam.ais (one plane) and microsam.ais3d (a z-stack, each plane segmented and joined
@@ -224,6 +224,8 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--port', type=int, default=8766)
+    ap.add_argument('--host', default='127.0.0.1',
+                    help='address to listen on (default 127.0.0.1, this machine only; 0.0.0.0 = every network interface: anyone who can reach this machine can then send it images to segment, so keep it behind a firewall or a trusted network)')
     ap.add_argument('--model', default='vit_b_lm')
     ap.add_argument('--device', default=None, help='mps, cuda or cpu (default: what torch finds)')
     a = ap.parse_args()
@@ -233,8 +235,8 @@ def main():
     STATE['device'] = STATE['predictor'].device.type  # 'mps', not 'mps:0': micro_sam takes the type only
     for t in (MicroSamAIS(False), MicroSamAIS(True)):
         TOOLS[t.id] = t
-    print(f'{PROTOCOL}: sam.fit and {", ".join(TOOLS)} ({a.model} on {STATE["predictor"].device}) on port {a.port}')
-    ThreadingHTTPServer(('127.0.0.1', a.port), Handler).serve_forever()
+    print(f'{PROTOCOL}: sam.fit and {", ".join(TOOLS)} ({a.model} on {STATE["predictor"].device}) on {a.host}:{a.port}')
+    ThreadingHTTPServer((a.host, a.port), Handler).serve_forever()
 
 
 if __name__ == '__main__':

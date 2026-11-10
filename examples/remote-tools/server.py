@@ -290,10 +290,12 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--port', type=int, default=8765)
+    ap.add_argument('--host', default='127.0.0.1',
+                    help='address to listen on (default 127.0.0.1, this machine only; 0.0.0.0 = every network interface: anyone who can reach this machine can then send it images to segment, so keep it behind a firewall or a trusted network)')
     a = ap.parse_args()
     TOOLS.update(available_tools())
-    print(f'{PROTOCOL}: offering {", ".join(TOOLS) or "nothing (install cellpose or stardist)"} on port {a.port}')
-    ThreadingHTTPServer(('127.0.0.1', a.port), Handler).serve_forever()
+    print(f'{PROTOCOL}: offering {", ".join(TOOLS) or "nothing (install cellpose or stardist)"} on {a.host}:{a.port}')
+    ThreadingHTTPServer((a.host, a.port), Handler).serve_forever()
 
 
 if __name__ == '__main__':
