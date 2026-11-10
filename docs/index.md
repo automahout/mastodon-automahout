@@ -28,6 +28,7 @@ elephant-local
 architecture
 writing-a-tool
 remote-tools
+prompts
 ```
 
 ```{toctree}
