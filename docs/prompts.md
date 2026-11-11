@@ -146,7 +146,7 @@ For each 10-timepoint window the tool automatically:
   5b. Refinement (refine_pass, default ON): ITERATES 'interpolate missed cells → retrain → re-detect' until detection COMPLETENESS reaches its target — this is how recall is bootstrapped up from a randomly-initialised model. Leave it on.
   6. Validates: continuity, detection completeness (recall vs image maxima), retention, isolated spots
 
-Quality thresholds per window: continuity>=70%%, completeness>=target (default 80%%), recall stable.
+Quality thresholds per window: continuity>=70%, completeness>=target (default 80%), recall stable.
 The tool logs per-window reports including WARNINGs for failed windows.
 
 After adaptive_track completes, use the tool result and visual assessment to decide:
@@ -158,14 +158,14 @@ After adaptive_track completes, use the tool result and visual assessment to dec
     High continuity compensates for neither; verify against the visual.
   - If visual shows overlapping/duplicate spots: increase dedup_factor (e.g. 0.6).
   - COLD START (untrained model): if the visual shows a dense mess of tiny ellipsoids covering the whole image (thousands of spots) the model is untrained. adaptive_track handles this automatically — it discards the noise and bootstraps from intensity seeds. If its result says 'MANUAL ANNOTATION REQUIRED', autonomous bootstrap failed: STOP and report to the user that they must place a few spot annotations on clear cells and re-run. Do NOT loop adaptive_track in that case.
-  - If border/elongated fraction is high (>30%% in logs): model is placing detections at cell edges rather than centers. Re-run adaptive_track — training will exclude those partial detections and teach the model to center ellipsoids. Set border_margin to less than image_min_dimension/4 (image physical size is logged in step 1 output, e.g. '100x80x15 µm' → border_margin<3.75). border_margin=0 disables border filtering. Lower max_aspect_ratio to exclude more elongated spots.
+  - If border/elongated fraction is high (>30% in logs): model is placing detections at cell edges rather than centers. Re-run adaptive_track — training will exclude those partial detections and teach the model to center ellipsoids. Set border_margin to less than image_min_dimension/4 (image physical size is logged in step 1 output, e.g. '100x80x15 µm' → border_margin<3.75). border_margin=0 disables border filtering. Lower max_aspect_ratio to exclude more elongated spots.
   - If specific time ranges are bad (noted in logs): re-run adaptive_track with start_timepoint and end_timepoint set to just that range.
 
 Quality interpretation (from tool result and visual assessment):
-  The tool result reports 'continuity: mean=N%%, worst=M%%' — this is the PRIMARY signal. Continuity is the fraction of interior spots that have both a predecessor and a successor link (fragmented tracks score low; divisions are not penalised).
-  GOOD: continuity>=70%%, few WARNINGs, ellipsoids on cells, similar sizes, consistent counts across adjacent timepoints, no overlapping ellipsoids.
-  POOR: continuity<70%%, many WARNINGs, spots on background, wildly varying ellipsoid sizes, count swings between frames, multiple ellipsoids on one cell.
-  Spot count and link_density are NOT quality indicators — a stray single link makes link_density 100%% even when every track is fragmented.
+  The tool result reports 'continuity: mean=N%, worst=M%' — this is the PRIMARY signal. Continuity is the fraction of interior spots that have both a predecessor and a successor link (fragmented tracks score low; divisions are not penalised).
+  GOOD: continuity>=70%, few WARNINGs, ellipsoids on cells, similar sizes, consistent counts across adjacent timepoints, no overlapping ellipsoids.
+  POOR: continuity<70%, many WARNINGs, spots on background, wildly varying ellipsoid sizes, count swings between frames, multiple ellipsoids on one cell.
+  Spot count and link_density are NOT quality indicators — a stray single link makes link_density 100% even when every track is fragmented.
   The tool result also reports 'divisions=N', which continuity CANNOT see — read it before concluding anything about a changing cell count. A count that RISES across the movie while divisions keep pace with it is PROLIFERATION, and moving a detection threshold is the wrong response; the result says which case you are in. If it says divisions are being MISSED, the daughters are already detected and the problem is in LINKING — do not lower min_intensity_ratio for it.
 
 ### Phase 2: Topology Cleanup
@@ -184,8 +184,8 @@ Only run after Phase 1 produces spots (total_spots > 0) AND Phase 1 track contin
 
 ### Done
 Declare done ONLY when ALL of these hold:
-  1. Track continuity is GOOD (>=70%%) — reported in the tool result and in the quantitative state ('Track continuity: N%% ...'). If it is POOR/FRAGMENTED, you are NOT done: re-run adaptive_track (higher n_iterations, e.g. 3; and/or lower min_intensity_ratio, e.g. 0.2) and only then Phase 2. Repeat until continuity is GOOD or it stops improving across two consecutive adaptive_track runs.
-  2. Detection is COMPLETE — the tool result's 'completeness: worst=N%%' is at or above target (default 80%%). Completeness = detected ÷ estimated cell count from the image; it is the ONLY signal that catches cells missed in EVERY frame (which continuity/recall cannot). If it says 'DETECTION INCOMPLETE', you are NOT done: re-run adaptive_track (higher refine_iterations, lower min_intensity_ratio). If it plateaus below target, ask_user (add annotations / adjust params).
+  1. Track continuity is GOOD (>=70%) — reported in the tool result and in the quantitative state ('Track continuity: N% ...'). If it is POOR/FRAGMENTED, you are NOT done: re-run adaptive_track (higher n_iterations, e.g. 3; and/or lower min_intensity_ratio, e.g. 0.2) and only then Phase 2. Repeat until continuity is GOOD or it stops improving across two consecutive adaptive_track runs.
+  2. Detection is COMPLETE — the tool result's 'completeness: worst=N%' is at or above target (default 80%). Completeness = detected ÷ estimated cell count from the image; it is the ONLY signal that catches cells missed in EVERY frame (which continuity/recall cannot). If it says 'DETECTION INCOMPLETE', you are NOT done: re-run adaptive_track (higher refine_iterations, lower min_intensity_ratio). If it plateaus below target, ask_user (add annotations / adjust params).
   3. Detection is clean — few/no ellipsoids on background specks (precision). If background noise is detected, set min_size and/or raise min_intensity_ratio.
   4. Phase 2 (topology cleanup) has been run on the continuous tracks.
 You have up to 20 turns — do NOT stop early just because spot/link counts or continuity look high. High continuity with missing cells is still a FAILURE.
@@ -195,7 +195,7 @@ Otherwise, declare done only when a genuine failure condition is reached (e.g. c
 - **total_spots == 0 is a FAILURE, never 'done'.** The quantitative state is authoritative: if it says 0 spots, detection failed or a step deleted everything — the visual assessment saying 'detection looks great' is a hallucination and must be IGNORED. Re-run adaptive_track; never declare done at 0 spots.
 - **Detection/tracking is done ONLY via the adaptive_track tool** (see Phase 1).
 - **If auto.correct reports deleted spots leaving ~0 (e.g. deleted spots≈total), detection was garbage (false-positive flood from an untrained model).** Do NOT keep cleaning — go back to Phase 1 adaptive_track, which bootstraps an untrained model.
-- **Track continuity is the primary quality signal, NOT spot/link counts.** A stray single link inflates link_density to 100%% on fully fragmented tracks.
+- **Track continuity is the primary quality signal, NOT spot/link counts.** A stray single link inflates link_density to 100% on fully fragmented tracks.
 - For Phase 2 across the full dataset pass **t=-1** to auto.correct (there is no all_timepoints parameter).
 - **NEVER use min_intensity_ratio > 0 on auto.correct.** It destroys valid spots whose neighbors were not yet detected.
 - **NEVER use min_tracklet_length > 0 on the first auto.correct pass.** Newly detected spots are not yet in long tracklets.

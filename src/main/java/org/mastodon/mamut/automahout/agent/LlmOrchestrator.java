@@ -379,7 +379,7 @@ public class LlmOrchestrator
 		}
 	}
 
-	private String buildSystemPrompt(
+	String buildSystemPrompt(
 			final String videoDescription,
 			final String toolSchemas,
 			final String initialState )
@@ -451,8 +451,8 @@ public class LlmOrchestrator
 				+ "recall is bootstrapped up from a randomly-initialised model. Leave it on.\n" );
 		sb.append( "  6. Validates: continuity, detection completeness (recall vs image maxima), "
 				+ "retention, isolated spots\n\n" );
-		sb.append( "Quality thresholds per window: continuity>=70%%, completeness>=target (default "
-				+ "80%%), recall stable.\n" );
+		sb.append( "Quality thresholds per window: continuity>=70%, completeness>=target (default "
+				+ "80%), recall stable.\n" );
 		sb.append( "The tool logs per-window reports including WARNINGs for failed windows.\n\n" );
 		sb.append( "After adaptive_track completes, use the tool result and visual assessment to decide:\n" );
 		sb.append( "  - If continuity is GOOD and recall is stable: proceed to Phase 2.\n" );
@@ -474,7 +474,7 @@ public class LlmOrchestrator
 				+ "from intensity seeds. If its result says 'MANUAL ANNOTATION REQUIRED', autonomous "
 				+ "bootstrap failed: STOP and report to the user that they must place a few spot "
 				+ "annotations on clear cells and re-run. Do NOT loop adaptive_track in that case.\n" );
-		sb.append( "  - If border/elongated fraction is high (>30%% in logs): " );
+		sb.append( "  - If border/elongated fraction is high (>30% in logs): " );
 		sb.append( "model is placing detections at cell edges rather than centers. " );
 		sb.append( "Re-run adaptive_track — training will exclude those partial detections and " );
 		sb.append( "teach the model to center ellipsoids. " );
@@ -485,15 +485,15 @@ public class LlmOrchestrator
 		sb.append( "  - If specific time ranges are bad (noted in logs): re-run adaptive_track " );
 		sb.append( "with start_timepoint and end_timepoint set to just that range.\n\n" );
 		sb.append( "Quality interpretation (from tool result and visual assessment):\n" );
-		sb.append( "  The tool result reports 'continuity: mean=N%%, worst=M%%' — this is the PRIMARY "
+		sb.append( "  The tool result reports 'continuity: mean=N%, worst=M%' — this is the PRIMARY "
 				+ "signal. Continuity is the fraction of interior spots that have both a predecessor "
 				+ "and a successor link (fragmented tracks score low; divisions are not penalised).\n" );
-		sb.append( "  GOOD: continuity>=70%%, few WARNINGs, ellipsoids on cells, similar sizes, " );
+		sb.append( "  GOOD: continuity>=70%, few WARNINGs, ellipsoids on cells, similar sizes, " );
 		sb.append( "consistent counts across adjacent timepoints, no overlapping ellipsoids.\n" );
-		sb.append( "  POOR: continuity<70%%, many WARNINGs, spots on background, wildly varying " );
+		sb.append( "  POOR: continuity<70%, many WARNINGs, spots on background, wildly varying " );
 		sb.append( "ellipsoid sizes, count swings between frames, multiple ellipsoids on one cell.\n" );
 		sb.append( "  Spot count and link_density are NOT quality indicators — a stray single link "
-				+ "makes link_density 100%% even when every track is fragmented.\n" );
+				+ "makes link_density 100% even when every track is fragmented.\n" );
 		sb.append( "  The tool result also reports 'divisions=N', which continuity CANNOT see — read it "
 				+ "before concluding anything about a changing cell count. A count that RISES across "
 				+ "the movie while divisions keep pace with it is PROLIFERATION, and moving a detection "
@@ -530,13 +530,13 @@ public class LlmOrchestrator
 
 		sb.append( "### Done\n" );
 		sb.append( "Declare done ONLY when ALL of these hold:\n" );
-		sb.append( "  1. Track continuity is GOOD (>=70%%) — reported in the tool result and in the "
-				+ "quantitative state ('Track continuity: N%% ...'). If it is POOR/FRAGMENTED, you are "
+		sb.append( "  1. Track continuity is GOOD (>=70%) — reported in the tool result and in the "
+				+ "quantitative state ('Track continuity: N% ...'). If it is POOR/FRAGMENTED, you are "
 				+ "NOT done: re-run adaptive_track (higher n_iterations, e.g. 3; and/or lower "
 				+ "min_intensity_ratio, e.g. 0.2) and only then Phase 2. Repeat until continuity is "
 				+ "GOOD or it stops improving across two consecutive adaptive_track runs.\n" );
-		sb.append( "  2. Detection is COMPLETE — the tool result's 'completeness: worst=N%%' is at or "
-				+ "above target (default 80%%). Completeness = detected ÷ estimated cell count from the "
+		sb.append( "  2. Detection is COMPLETE — the tool result's 'completeness: worst=N%' is at or "
+				+ "above target (default 80%). Completeness = detected ÷ estimated cell count from the "
 				+ "image; it is the ONLY signal that catches cells missed in EVERY frame (which "
 				+ "continuity/recall cannot). If it says 'DETECTION INCOMPLETE', you are NOT done: "
 				+ "re-run adaptive_track (higher refine_iterations, lower min_intensity_ratio). If it "
@@ -559,7 +559,7 @@ public class LlmOrchestrator
 				+ "detection was garbage (false-positive flood from an untrained model).** Do NOT keep "
 				+ "cleaning — go back to Phase 1 adaptive_track, which bootstraps an untrained model.\n" );
 		sb.append( "- **Track continuity is the primary quality signal, NOT spot/link counts.** "
-				+ "A stray single link inflates link_density to 100%% on fully fragmented tracks.\n" );
+				+ "A stray single link inflates link_density to 100% on fully fragmented tracks.\n" );
 		sb.append( "- For Phase 2 across the full dataset pass **t=-1** to auto.correct "
 				+ "(there is no all_timepoints parameter).\n" );
 		sb.append( "- **NEVER use min_intensity_ratio > 0 on auto.correct.** " );
