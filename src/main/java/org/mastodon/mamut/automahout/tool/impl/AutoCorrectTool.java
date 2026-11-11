@@ -120,6 +120,44 @@ public class AutoCorrectTool implements AutomahoutTool
 		return ID;
 	}
 
+	/**
+	 * The parameters, typed, so the Run a Tool dialog shows them (it showed none, and auto.correct then ran on the
+	 * current timepoint only, with no way to ask for all). A blank number keeps what execute does without it; the
+	 * checkboxes, always sent, open on those same values: gap filling on, refitting as the settings dialog has it.
+	 */
+	@Override
+	public java.util.List< org.mastodon.mamut.automahout.tool.ToolParameter > getParameters()
+	{
+		final AutomahoutSettings saved = new AutomahoutSettings();
+		return java.util.Arrays.asList(
+				org.mastodon.mamut.automahout.tool.ToolParameter.integer( PARAM_T,
+						"timepoint to correct; -1 = every timepoint of the run's range; blank = the one shown", null ),
+				org.mastodon.mamut.automahout.tool.ToolParameter.number( PARAM_LONG_LINK_FACTOR,
+						"cut a link longer than this x the larger radius; blank = the settings dialog's", null ),
+				org.mastodon.mamut.automahout.tool.ToolParameter.number( PARAM_MERGE_OVERLAP_RATIO,
+						"merge spots closer than this x the larger radius (0 = off); blank = the settings dialog's", null ),
+				org.mastodon.mamut.automahout.tool.ToolParameter.number( PARAM_MIN_INTENSITY_RATIO,
+						"delete spots dimmer than this x the frame's median (0 = off); blank = the settings dialog's", null ),
+				org.mastodon.mamut.automahout.tool.ToolParameter.number( PARAM_MIN_SIZE_RATIO,
+						"delete spots smaller than this x the frame's median radius (0 = off); blank = the settings dialog's", null ),
+				org.mastodon.mamut.automahout.tool.ToolParameter.bool( PARAM_FILL_GAPS,
+						"re-detect with ELEPHANT where a track ends or starts without a predecessor", Boolean.TRUE ),
+				org.mastodon.mamut.automahout.tool.ToolParameter.number( PARAM_GAP_CROP_FACTOR,
+						"gap filling's crop, x the spot radius; blank = the settings dialog's", null ),
+				org.mastodon.mamut.automahout.tool.ToolParameter.integer( PARAM_MIN_TRACKLET_LENGTH,
+						"delete dangling tracklets shorter than this (0 = off, the default)", null ),
+				org.mastodon.mamut.automahout.tool.ToolParameter.number( PARAM_DIVISION_LINK_FACTOR,
+						"link a track start to a dividing mother within this x the radius (0 = off); blank = the settings dialog's", null ),
+				org.mastodon.mamut.automahout.tool.ToolParameter.integer( PARAM_MIN_BRANCH_LENGTH,
+						"delete branches shorter than this after a division; blank = 0, or learned from ground truth", null ),
+				org.mastodon.mamut.automahout.tool.ToolParameter.integer( PARAM_MIN_DIVISION_INTERVAL,
+						"shortest time between two divisions in a lineage (with t = -1); blank = learned or estimated", null ),
+				org.mastodon.mamut.automahout.tool.ToolParameter.bool( PARAM_REFIT,
+						"re-detect elongated spots with ELEPHANT (one server call each)", saved.isCorrectRefitAnisotropic() ),
+				org.mastodon.mamut.automahout.tool.ToolParameter.number( PARAM_ANISOTROPY_THRESHOLD,
+						"a spot is elongated above this ratio of its covariance; blank = the settings dialog's", null ) );
+	}
+
 	@Override
 	public String getDescription()
 	{
