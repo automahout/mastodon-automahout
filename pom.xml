@@ -227,7 +227,9 @@
 				<configuration>
 					<!-- pom-scijava gives tests 512 MB; CellScaleTest's 2200 x 2000 synthetic frames ran out of it
 					     once the suite reached 812 tests (2026-10-24). The other arguments are the parent's. -->
-					<argLine>@{argLine} -Xms512m -Xmx2g -Dapple.awt.UIElement=true --add-opens=java.base/java.lang=ALL-UNNAMED</argLine>
+					<!-- automahout.prefs.root: tests read and write a preferences node of their own, never the user's (a test
+						 picked up the micro-SAM server configured in the GUI instead of its own fake). -->
+					<argLine>@{argLine} -Xms512m -Xmx2g -Dapple.awt.UIElement=true --add-opens=java.base/java.lang=ALL-UNNAMED -Dautomahout.prefs.root=automahout-tests</argLine>
 				</configuration>
 			</plugin>
 		</plugins>
